@@ -1,0 +1,24 @@
+name: Günlük Ürün Takip
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  urun-takip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu indir
+        uses: actions/checkout@v4
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Kütüphaneleri yükle
+        run: pip install requests beautifulsoup4 gspread google-auth
+      - name: Scripti çalıştır
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+        run: python scraper.py
