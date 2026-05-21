@@ -297,6 +297,7 @@ if __name__ == "__main__":
     sheets_guncelle(veriler)
     print("✅ Tamamlandı!")
 
+
 									
 									
 									
