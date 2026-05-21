@@ -295,7 +295,8 @@ if __name__ == "__main__":
 
     print("\n📊 Google Sheets güncelleniyor...")
     sheets_guncelle(veriler)
-    print("✅ Tamamlandı!")	
+    print("✅ Tamamlandı!")
+
 									
 									
 									
