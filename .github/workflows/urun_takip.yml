@@ -11,12 +11,18 @@ jobs:
     steps:
       - name: Kodu indir
         uses: actions/checkout@v4
+
       - name: Python kur
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - name: Kütüphaneleri yükle
-        run: pip install requests beautifulsoup4 gspread google-auth
+        run: |
+          pip install requests gspread google-auth playwright
+          playwright install chromium
+          playwright install-deps chromium
+
       - name: Scripti çalıştır
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
