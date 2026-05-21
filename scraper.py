@@ -1,5 +1,4 @@
 import requests
-from bs4 import BeautifulSoup
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
@@ -8,9 +7,6 @@ import time
 import re
 import os
 
-# ============================================================
-#  TAKİP EDİLECEK ÜRÜNLER
-# ============================================================
 URUNLER = [
     {
         "site": "N11",
@@ -37,32 +33,43 @@ URUNLER = [
     },
 ]
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-}
-
 # ============================================================
 #  N11
 # ============================================================
 def cek_n11(urun):
     sonuc = {"fiyat": None, "puan": None, "yorum": None}
     try:
-        r = requests.get(urun["url"], headers=HEADERS, timeout=20)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36",
+            "Accept-Language": "tr-TR,tr;q=0.9",
+        }
+        r = requests.get(urun["url"], headers=headers, timeout=20)
         print(f"  N11 HTTP {r.status_code}")
         if r.status_code != 200:
             return sonuc
         html = r.text
 
-        # Fiyat — N11 kuruş cinsinden veriyor, 100'e böl
-        m = re.search(r'"price"\s*:\s*"?([\d]+)"?', html)
+        # Fiyat — tüm olası formatları dene
+        # Format 1: "displayPrice":"13999,00"
+        m = re.search(r'"displayPrice"\s*:\s*"([\d.,]+)"', html)
         if m:
-            sonuc["fiyat"] = round(int(m.group(1)) / 100, 2)
+            sonuc["fiyat"] = float(m.group(1).replace(".", "").replace(",", "."))
+            print(f"  N11 fiyat (displayPrice): {sonuc['fiyat']}")
+
+        # Format 2: "salePrice":1399900 (kuruş)
+        if not sonuc["fiyat"]:
+            m = re.search(r'"salePrice"\s*:\s*(\d+)', html)
+            if m:
+                sonuc["fiyat"] = round(int(m.group(1)) / 100, 2)
+                print(f"  N11 fiyat (salePrice): {sonuc['fiyat']}")
+
+        # Format 3: itemprop content
         if not sonuc["fiyat"]:
             m = re.search(r'itemprop="price"[^>]*content="([\d.,]+)"', html)
             if m:
-                sonuc["fiyat"] = float(m.group(1).replace(".", "").replace(",", "."))
+                val = float(m.group(1).replace(",", "."))
+                sonuc["fiyat"] = round(val / 100, 2) if val > 10000 else val
+                print(f"  N11 fiyat (itemprop): {sonuc['fiyat']}")
 
         # Puan
         m = re.search(r'"ratingValue"\s*:\s*"?([\d.]+)"?', html)
@@ -81,114 +88,115 @@ def cek_n11(urun):
     return sonuc
 
 # ============================================================
-#  TRENDYOL — mobil API
+#  TRENDYOL
 # ============================================================
 def cek_trendyol(urun):
     sonuc = {"fiyat": None, "puan": None, "yorum": None}
     try:
-        urun_id = urun.get("urun_id", "")
-        # Trendyol mobil API endpoint
-        api_url = f"https://mobileapi.trendyol.com/discovery-web-productgw-service/api/product-detail/{urun_id}/mobile"
         headers = {
-            "User-Agent": "Trendyol/6.12.0 (iPhone; iOS 15.0; Scale/3.00)",
-            "Accept": "application/json",
-            "Accept-Language": "tr-TR",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36",
+            "Accept-Language": "tr-TR,tr;q=0.9",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         }
-        r = requests.get(api_url, headers=headers, timeout=20)
-        print(f"  Trendyol API HTTP {r.status_code}")
-
-        if r.status_code == 200:
-            data = r.json()
-            result = data.get("result", data)
-            price = result.get("price", {})
-            if isinstance(price, dict):
-                sonuc["fiyat"] = price.get("discountedPrice") or price.get("originalPrice")
-            elif isinstance(price, (int, float)):
-                sonuc["fiyat"] = price
-
-            sonuc["puan"] = result.get("ratingScore") or result.get("averageRating")
-            sonuc["yorum"] = result.get("commentCount") or result.get("reviewCount")
-            print(f"  Trendyol API sonuç: {result.keys() if hasattr(result, 'keys') else result}")
+        r = requests.get(urun["url"], headers=headers, timeout=20)
+        print(f"  Trendyol HTTP {r.status_code}")
+        if r.status_code != 200:
             return sonuc
+        html = r.text
 
-        # Alternatif: web sayfasından çek
-        r2 = requests.get(urun["url"], headers=HEADERS, timeout=20)
-        print(f"  Trendyol web HTTP {r2.status_code}")
-        if r2.status_code == 200:
-            html = r2.text
-            # Fiyat — JSON içinde
-            m = re.search(r'"discountedPrice"\s*:\s*([\d.]+)', html)
-            if not m:
-                m = re.search(r'"price"\s*:\s*([\d.]+)', html)
-            if m:
-                val = float(m.group(1))
-                # Trendyol bazen kuruş olarak veriyor
-                sonuc["fiyat"] = round(val / 100, 2) if val > 100000 else val
+        # Trendyol window.__PRODUCT_DETAIL_APP_INITIAL_STATE__ içinde veri saklar
+        m = re.search(r'__PRODUCT_DETAIL_APP_INITIAL_STATE__\s*=\s*(\{.*?\});', html, re.DOTALL)
+        if m:
+            try:
+                data = json.loads(m.group(1))
+                product = data.get("product", {})
+                price = product.get("priceInfo", {})
+                sonuc["fiyat"] = price.get("discountedPrice") or price.get("price")
+                sonuc["puan"] = product.get("ratingScore") or product.get("averageRating")
+                sonuc["yorum"] = product.get("commentCount")
+                print(f"  Trendyol state: fiyat={sonuc['fiyat']} puan={sonuc['puan']} yorum={sonuc['yorum']}")
+                if sonuc["fiyat"]:
+                    return sonuc
+            except Exception as e:
+                print(f"  Trendyol JSON parse hata: {e}")
 
-            m = re.search(r'"ratingScore"\s*:\s*([\d.]+)', html)
-            if m:
-                sonuc["puan"] = float(m.group(1))
+        # Fallback regex
+        # Fiyat formatları: 3285.00 veya "3285,00"
+        m = re.search(r'"discountedPrice"\s*:\s*([\d.]+)', html)
+        if not m:
+            m = re.search(r'"price"\s*:\s*([\d.]+)', html)
+        if m:
+            val = float(m.group(1))
+            sonuc["fiyat"] = round(val / 100, 2) if val > 100000 else val
+            print(f"  Trendyol fiyat (regex): {sonuc['fiyat']}")
 
-            m = re.search(r'"commentCount"\s*:\s*(\d+)', html)
-            if m:
-                sonuc["yorum"] = int(m.group(1))
+        m = re.search(r'"ratingScore"\s*:\s*([\d.]+)', html)
+        if m:
+            sonuc["puan"] = float(m.group(1))
+
+        m = re.search(r'"commentCount"\s*:\s*(\d+)', html)
+        if m:
+            sonuc["yorum"] = int(m.group(1))
 
     except Exception as e:
         print(f"  Trendyol HATA: {e}")
     return sonuc
 
 # ============================================================
-#  HEPSİBURADA — JSON-LD + meta tag
+#  HEPSİBURADA — 403 veriyor, Oxylabs free proxy dene
 # ============================================================
 def cek_hepsiburada(urun):
     sonuc = {"fiyat": None, "puan": None, "yorum": None}
     try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
-            "Accept-Language": "tr-TR,tr;q=0.9",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Referer": "https://www.hepsiburada.com/",
-        }
-        r = requests.get(urun["url"], headers=headers, timeout=20)
-        print(f"  HB HTTP {r.status_code}")
-        if r.status_code != 200:
-            return sonuc
+        # Farklı User-Agent kombinasyonları dene
+        ua_listesi = [
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+        ]
 
-        html = r.text
+        for ua in ua_listesi:
+            headers = {
+                "User-Agent": ua,
+                "Accept-Language": "tr-TR,tr;q=0.9",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Connection": "keep-alive",
+                "Cache-Control": "no-cache",
+            }
+            session = requests.Session()
+            # Önce ana sayfaya git (cookie al)
+            session.get("https://www.hepsiburada.com", headers=headers, timeout=15)
+            time.sleep(1)
+            r = session.get(urun["url"], headers=headers, timeout=20)
+            print(f"  HB HTTP {r.status_code} (UA: {ua[:40]}...)")
 
-        # JSON-LD bloğunu bul
-        ld_match = re.search(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL)
-        if ld_match:
-            try:
-                ld = json.loads(ld_match.group(1))
-                offers = ld.get("offers", {})
-                if isinstance(offers, list):
-                    offers = offers[0]
-                if offers.get("price"):
-                    sonuc["fiyat"] = float(str(offers["price"]).replace(",", "."))
-                if ld.get("aggregateRating"):
-                    sonuc["puan"] = float(ld["aggregateRating"].get("ratingValue", 0))
-                    sonuc["yorum"] = int(ld["aggregateRating"].get("reviewCount", 0))
-                print(f"  HB JSON-LD: fiyat={sonuc['fiyat']} puan={sonuc['puan']} yorum={sonuc['yorum']}")
+            if r.status_code == 200:
+                html = r.text
+                # JSON-LD
+                for ld_str in re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
+                    try:
+                        ld = json.loads(ld_str)
+                        offers = ld.get("offers", {})
+                        if isinstance(offers, list):
+                            offers = offers[0]
+                        if offers.get("price"):
+                            sonuc["fiyat"] = float(str(offers["price"]).replace(",", "."))
+                        agg = ld.get("aggregateRating", {})
+                        if agg.get("ratingValue"):
+                            sonuc["puan"] = float(agg["ratingValue"])
+                            sonuc["yorum"] = int(agg.get("reviewCount", 0))
+                    except:
+                        pass
+
+                if not sonuc["fiyat"]:
+                    m = re.search(r'"price"\s*:\s*"?([\d.,]+)"?', html)
+                    if m:
+                        sonuc["fiyat"] = float(m.group(1).replace(",", "."))
+
                 if sonuc["fiyat"]:
-                    return sonuc
-            except:
-                pass
-
-        # Regex fallback
-        m = re.search(r'"price"\s*:\s*"?([\d.,]+)"?', html)
-        if m:
-            sonuc["fiyat"] = float(m.group(1).replace(",", "."))
-
-        m = re.search(r'"ratingValue"\s*:\s*"?([\d.]+)"?', html)
-        if m:
-            sonuc["puan"] = float(m.group(1))
-
-        m = re.search(r'"reviewCount"\s*:\s*(\d+)', html)
-        if not m:
-            m = re.search(r'(\d+)\s*[Dd]eğerlendirme', html)
-        if m:
-            sonuc["yorum"] = int(m.group(1))
+                    break
+            time.sleep(2)
 
     except Exception as e:
         print(f"  HB HATA: {e}")
@@ -210,15 +218,12 @@ def sheets_guncelle(veriler):
     ]
     creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
     gc = gspread.authorize(creds)
-
-    spreadsheet_id = os.environ.get("SPREADSHEET_ID")
-    sh = gc.open_by_key(spreadsheet_id)
+    sh = gc.open_by_key(os.environ.get("SPREADSHEET_ID"))
 
     simdi = datetime.now()
     tarih = simdi.strftime("%d.%m.%Y")
     saat  = simdi.strftime("%H:%M")
 
-    # Ana sheet
     try:
         ws = sh.worksheet("Ürün Takip")
         ws.clear()
@@ -238,12 +243,10 @@ def sheets_guncelle(veriler):
             v["fiyat"] if v["fiyat"] else "Çekilemedi",
             v["puan"]  if v["puan"]  else "-",
             v["yorum"] if v["yorum"] else "-",
-            f"{tarih} {saat}",
-            v["url"]
+            f"{tarih} {saat}", v["url"]
         ])
         time.sleep(0.5)
 
-    # Geçmiş sheet
     try:
         gs = sh.worksheet("Geçmiş")
     except:
@@ -293,7 +296,6 @@ if __name__ == "__main__":
     print("\n📊 Google Sheets güncelleniyor...")
     sheets_guncelle(veriler)
     print("✅ Tamamlandı!")	
-									
 									
 									
 									
