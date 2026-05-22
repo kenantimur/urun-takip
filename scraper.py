@@ -32,10 +32,14 @@ URUNLER = [
 ]
 
 def fiyat_parse(text):
-    """'3.285,00 TL' → 3285.0"""
-    text = re.sub(r'[^\d,.]', '', text.strip())
-    # Türk formatı: 3.285,00
-    if ',' in text and '.' in text:
+    """'10.999 TL' → 10999.0, '3.285,00' → 3285.0"""
+    text = text.strip()
+    text = re.sub(r'[^\d,.]', '', text)
+    # Türk formatı: nokta binlik ayırıcı, virgül ondalık
+    # Örn: 10.999 → 10999, 3.285,00 → 3285.0
+    if re.match(r'^\d{1,3}(\.\d{3})+(,\d+)?$', text):
+        text = text.replace('.', '').replace(',', '.')
+    elif ',' in text and '.' in text:
         text = text.replace('.', '').replace(',', '.')
     elif ',' in text:
         text = text.replace(',', '.')
@@ -44,28 +48,53 @@ def fiyat_parse(text):
     except:
         return None
 
+def stealth_context(playwright):
+    """Bot tespitini zorlaştıran tarayıcı context'i"""
+    browser = playwright.chromium.launch(
+        headless=True,
+        args=[
+            '--no-sandbox',
+            '--disable-blink-features=AutomationControlled',
+            '--disable-dev-shm-usage',
+        ]
+    )
+    context = browser.new_context(
+        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        locale="tr-TR",
+        timezone_id="Europe/Istanbul",
+        viewport={"width": 1280, "height": 800},
+        extra_http_headers={"Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8"},
+    )
+    # navigator.webdriver = false yap
+    context.add_init_script("""
+        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+        Object.defineProperty(navigator, 'plugins', { get: () => [1,2,3,4,5] });
+        Object.defineProperty(navigator, 'languages', { get: () => ['tr-TR', 'tr', 'en'] });
+        window.chrome = { runtime: {} };
+    """)
+    return browser, context
+
 def cek_playwright(urun):
     sonuc = {"fiyat": None, "puan": None, "yorum": None}
     site = urun["site"].lower()
 
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            context = browser.new_context(
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-                locale="tr-TR",
-                viewport={"width": 1280, "height": 800},
-                extra_http_headers={"Accept-Language": "tr-TR,tr;q=0.9"}
-            )
+            browser, context = stealth_context(p)
             page = context.new_page()
+
+            if site == "hepsiburada":
+                # HB için önce ana sayfaya git, cookie al
+                page.goto("https://www.hepsiburada.com", wait_until="domcontentloaded", timeout=30000)
+                time.sleep(2)
+
             page.goto(urun["url"], wait_until="networkidle", timeout=45000)
-            time.sleep(3)
+            time.sleep(4)
             html = page.content()
-            print(f"  HTML uzunluğu: {len(html)}")
+            print(f"  HTML uzunluğu: {len(html)}, Başlık: {page.title()[:50]}")
 
             if site == "n11":
-                # Fiyat — DOM
-                for sel in ['[class*="price"]', '[class*="Price"]', 'span.price', '.newPrice', '.price']:
+                for sel in ['.price', '[class*="price"]', '.newPrice span', 'span[class*="price"]']:
                     try:
                         txt = page.locator(sel).first.inner_text(timeout=3000)
                         val = fiyat_parse(txt)
@@ -75,95 +104,77 @@ def cek_playwright(urun):
                             break
                     except:
                         pass
-                # Puan
                 m = re.search(r'"ratingValue"\s*:\s*"?([\d.]+)"?', html)
                 if m:
                     sonuc["puan"] = float(m.group(1))
-                # Yorum
-                for sel in ['[class*="review"]', '[class*="comment"]', '[class*="rating"]']:
-                    try:
-                        txt = page.locator(sel).first.inner_text(timeout=2000)
-                        m2 = re.search(r'(\d+)', txt)
-                        if m2:
-                            sonuc["yorum"] = int(m2.group(1))
-                            break
-                    except:
-                        pass
-                if not sonuc["yorum"]:
-                    m = re.search(r'"reviewCount"\s*:\s*(\d+)', html)
-                    if m:
-                        sonuc["yorum"] = int(m.group(1))
+                m = re.search(r'"reviewCount"\s*:\s*(\d+)', html)
+                if m:
+                    sonuc["yorum"] = int(m.group(1))
 
             elif site == "trendyol":
-                # Fiyat — birçok farklı selector dene
-                for sel in [
-                    '[class*="prc-dsc"]', '[class*="price"]', '[class*="Price"]',
-                    'span[class*="discountedPrice"]', '.product-price', 'p.prc-dsc'
-                ]:
-                    try:
-                        txt = page.locator(sel).first.inner_text(timeout=3000)
-                        val = fiyat_parse(txt)
-                        if val and val > 10:
-                            sonuc["fiyat"] = val
-                            print(f"  TY fiyat ({sel}): {txt} → {val}")
-                            break
-                    except:
-                        pass
-                # Regex fallback
-                if not sonuc["fiyat"]:
-                    m = re.search(r'"discountedPrice"\s*:\s*([\d.]+)', html)
-                    if not m:
-                        m = re.search(r'"price"\s*:\s*([\d.]+)', html)
+                # Trendyol fiyat regex — JSON içinde
+                # Format: "price":32.85 veya "price":3285
+                patterns = [
+                    r'"discountedPrice"\s*:\s*([\d]+\.[\d]+)',
+                    r'"discountedPrice"\s*:\s*([\d]+)',
+                    r'"price"\s*:\s*([\d]+\.[\d]+)',
+                    r'"sellingPrice"\s*:\s*([\d]+\.[\d]+)',
+                    r'"listPrice"\s*:\s*([\d]+\.[\d]+)',
+                ]
+                for pat in patterns:
+                    m = re.search(pat, html)
                     if m:
                         val = float(m.group(1))
-                        sonuc["fiyat"] = round(val / 100, 2) if val > 100000 else val
-                        print(f"  TY regex fiyat: {sonuc['fiyat']}")
-                # Puan
-                for sel in ['[class*="rating"]', '[class*="score"]', '.rnr-sm-avg-rating']:
-                    try:
-                        txt = page.locator(sel).first.inner_text(timeout=2000)
-                        m2 = re.search(r'([\d.]+)', txt)
-                        if m2:
-                            v = float(m2.group(1))
-                            if 0 < v <= 5:
-                                sonuc["puan"] = v
+                        # 3285 → kuruşsa 100'e böl değil, TL cinsinden
+                        # Trendyol genelde tam TL verir
+                        sonuc["fiyat"] = val
+                        print(f"  TY fiyat regex ({pat}): {val}")
+                        break
+
+                # DOM selector dene
+                if not sonuc["fiyat"]:
+                    for sel in ['[class*="price"]', 'span[class*="Price"]', '.product-price-container span']:
+                        try:
+                            items = page.locator(sel).all_inner_texts()
+                            for txt in items:
+                                val = fiyat_parse(txt)
+                                if val and 100 < val < 1000000:
+                                    sonuc["fiyat"] = val
+                                    print(f"  TY DOM fiyat ({sel}): {txt} → {val}")
+                                    break
+                            if sonuc["fiyat"]:
                                 break
-                    except:
-                        pass
-                # Yorum
+                        except:
+                            pass
+
+                m = re.search(r'"ratingScore"\s*:\s*([\d.]+)', html)
+                if m:
+                    sonuc["puan"] = float(m.group(1))
                 m = re.search(r'"commentCount"\s*:\s*(\d+)', html)
                 if m:
                     sonuc["yorum"] = int(m.group(1))
 
             elif site == "hepsiburada":
-                # HB 1335 karakter = bot engeli, stealth mod dene
-                print(f"  HB sayfa başlığı: {page.title()}")
-                # Fiyat
-                for sel in [
-                    '[data-test-id="price-current-price"]',
-                    '[class*="price"]', '[class*="Price"]',
-                    'span[class*="product-price"]', '.product-price'
-                ]:
-                    try:
-                        txt = page.locator(sel).first.inner_text(timeout=3000)
-                        val = fiyat_parse(txt)
-                        if val and val > 10:
-                            sonuc["fiyat"] = val
-                            print(f"  HB fiyat ({sel}): {txt} → {val}")
-                            break
-                    except:
-                        pass
-                # JSON-LD fallback
-                if not sonuc["fiyat"]:
+                if len(html) < 5000:
+                    print(f"  HB engel sayfası — stealth başarısız")
+                else:
+                    for sel in ['[data-test-id="price-current-price"]', '[class*="price"]', 'span[class*="Price"]']:
+                        try:
+                            txt = page.locator(sel).first.inner_text(timeout=3000)
+                            val = fiyat_parse(txt)
+                            if val and val > 10:
+                                sonuc["fiyat"] = val
+                                print(f"  HB fiyat ({sel}): {txt} → {val}")
+                                break
+                        except:
+                            pass
                     for ld_str in re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
                         try:
                             ld = json.loads(ld_str)
                             offers = ld.get("offers", {})
-                            if isinstance(offers, list):
-                                offers = offers[0]
+                            if isinstance(offers, list): offers = offers[0]
                             if offers.get("price"):
                                 sonuc["fiyat"] = float(str(offers["price"]).replace(",", "."))
-                                print(f"  HB JSON-LD fiyat: {sonuc['fiyat']}")
                             agg = ld.get("aggregateRating", {})
                             if agg.get("ratingValue"):
                                 sonuc["puan"] = float(agg["ratingValue"])
@@ -188,7 +199,6 @@ def sheets_guncelle(veriler):
     creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
     gc = gspread.authorize(creds)
     sh = gc.open_by_key(os.environ.get("SPREADSHEET_ID"))
-
     simdi = datetime.now()
     tarih = simdi.strftime("%d.%m.%Y")
     saat  = simdi.strftime("%H:%M")
@@ -229,7 +239,6 @@ def sheets_guncelle(veriler):
             v["yorum"] if v["yorum"] else "-",
             v["url"]])
         time.sleep(0.5)
-
     print(f"✅ Google Sheets güncellendi: {tarih} {saat}")
 
 if __name__ == "__main__":
