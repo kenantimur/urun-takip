@@ -18,10 +18,7 @@ jobs:
           python-version: '3.11'
 
       - name: Kütüphaneleri yükle
-        run: |
-          pip install requests gspread google-auth playwright
-          playwright install chromium
-          playwright install-deps chromium
+        run: pip install requests gspread google-auth
 
       - name: Scripti çalıştır
         env:
