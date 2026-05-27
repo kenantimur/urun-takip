@@ -73,11 +73,16 @@ def cek_urun(urun):
     print(f"  HTML uzunluğu: {len(html)}")
 
     if site == "n11":
-        # DEBUG
-        for key in ["salePrice", "currentPrice", "newPrice", "buyingPrice", "displayPrice"]:
-            kidx = html.find(key)
-            if kidx != -1:
-                print(f"  DBG_KEY {key}: {html[kidx:kidx+60]}")
+        # Yöntem 0: displayPrice — ana ürün fiyatı (en güvenilir)
+        m = re.search(r'"displayPrice"\s*:\s*"([0-9.,]+ TL)"', html)
+        if not m:
+            m = re.search(r'"displayPrice"\s*:\s*"([0-9.,]+)"', html)
+        if m:
+            val = fiyat_parse(m.group(1))
+            if val and val > 10:
+                sonuc["fiyat"] = val
+                print(f"  N11 displayPrice: {m.group(1)} → {val}")
+
         # Yöntem 1: itemprop="price" content — ana ürün fiyatı (TL cinsinden, bölme yok)
         m = re.search(r'itemprop=["\']price["\'][^>]*content=["\']([0-9.,]+)["\']', html)
         if not m:
