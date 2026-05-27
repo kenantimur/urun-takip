@@ -73,10 +73,11 @@ def cek_urun(urun):
     print(f"  HTML uzunluğu: {len(html)}")
 
     if site == "n11":
-        # N11'de ana fiyat JSON-LD içinde "price" olarak geçiyor
-        # Sepette fiyat: "salePrice" veya itemprop content
-        # Diğer mağaza fiyatları farklı bir alanda
-        
+        # DEBUG
+        debug_lines = [l.strip()[:200] for l in html.split(chr(10)) if 'price' in l.lower() and any(c.isdigit() for c in l) and len(l.strip()) < 250]
+        for dl in debug_lines[:15]:
+            print(f"  DBG: {dl}")
+
         # Yöntem 1: itemprop="price" content — ana ürün fiyatı (TL cinsinden, bölme yok)
         m = re.search(r'itemprop=["\']price["\'][^>]*content=["\']([0-9.,]+)["\']', html)
         if not m:
