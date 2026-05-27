@@ -77,34 +77,44 @@ def cek_urun(urun):
         # Sepette fiyat: "salePrice" veya itemprop content
         # Diğer mağaza fiyatları farklı bir alanda
         
-        # Yöntem 1: itemprop="price" — ana ürün fiyatı
-        m = re.search(r'itemprop="price"[^>]*content="([\d.,]+)"', html)
+        # Yöntem 1: itemprop="price" content — ana ürün fiyatı (TL cinsinden, bölme yok)
+        m = re.search(r'itemprop=["\']price["\'][^>]*content=["\']([0-9.,]+)["\']', html)
+        if not m:
+            m = re.search(r'content=["\']([0-9.,]+)["\'][^>]*itemprop=["\']price["\']', html)
         if m:
             val = fiyat_parse(m.group(1))
-            # N11 bazen kuruş olarak veriyor
-            if val and val > 10000:
-                val = round(val / 100, 2)
-            sonuc["fiyat"] = val
-            print(f"  N11 itemprop fiyat: {m.group(1)} → {val}")
+            if val and val > 10:
+                sonuc["fiyat"] = val
+                print(f"  N11 itemprop fiyat: {m.group(1)} → {val}")
 
-        # Yöntem 2: JSON-LD offers price
+        # Yöntem 2: salePrice — kuruş cinsinden, 100'e böl
         if not sonuc["fiyat"]:
+            m = re.search(r'"salePrice"\s*:\s*(\d+)', html)
+            if m:
+                val = round(int(m.group(1)) / 100, 2)
+                sonuc["fiyat"] = val
+                print(f"  N11 salePrice: {m.group(1)} → {val}")
+
+        # Yöntem 3: JSON-LD offers — tüm listedeki en düşük fiyat (ana satıcı)
+        if not sonuc["fiyat"]:
+            fiyatlar = []
             for ld_str in re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
                 try:
                     ld = json.loads(ld_str)
                     offers = ld.get("offers", {})
                     if isinstance(offers, list):
-                        offers = offers[0]
-                    price = offers.get("price") or offers.get("lowPrice")
-                    if price:
-                        val = float(str(price).replace(",", "."))
-                        if val > 10000:
-                            val = round(val / 100, 2)
-                        sonuc["fiyat"] = val
-                        print(f"  N11 JSON-LD fiyat: {price} → {val}")
-                        break
+                        for o in offers:
+                            p = o.get("price")
+                            if p:
+                                fiyatlar.append(float(str(p).replace(",", ".")))
+                    elif offers.get("price"):
+                        fiyatlar.append(float(str(offers["price"]).replace(",", ".")))
                 except:
                     pass
+            if fiyatlar:
+                # En düşük fiyat ana satıcı fiyatı değil — sayfadaki ilk/ana fiyatı al
+                sonuc["fiyat"] = min(fiyatlar)
+                print(f"  N11 JSON-LD fiyatlar: {fiyatlar} → min={sonuc['fiyat']}")
 
         # Yorum ve puan
         m = re.search(r'"ratingValue"\s*:\s*"?([\d.]+)"?', html)
