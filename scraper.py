@@ -73,17 +73,11 @@ def cek_urun(urun):
     print(f"  HTML uzunluğu: {len(html)}")
 
     if site == "n11":
-        # DEBUG — price bloğundan 200 karakter sonrasını göster
-        m_dbg = re.search(r'class=["'].*?price.*?["']', html)
-        if m_dbg:
-            pos = m_dbg.start()
-            print(f"  DBG_BLOCK: {html[pos:pos+400].replace(chr(10),' ')}")
-        # salePrice, currentPrice, newPrice araması
-        for key in ['salePrice', 'currentPrice', 'newPrice', 'buyingPrice', 'displayPrice', 'price']:
-            m2 = re.search(key + r'["']?\s*[=:,]\s*["']?([0-9.,]+)', html)
-            if m2:
-                print(f"  DBG_KEY {key}: {m2.group(0)[:100]}")
-
+        # DEBUG
+        for key in ["salePrice", "currentPrice", "newPrice", "buyingPrice", "displayPrice"]:
+            kidx = html.find(key)
+            if kidx != -1:
+                print(f"  DBG_KEY {key}: {html[kidx:kidx+60]}")
         # Yöntem 1: itemprop="price" content — ana ürün fiyatı (TL cinsinden, bölme yok)
         m = re.search(r'itemprop=["\']price["\'][^>]*content=["\']([0-9.,]+)["\']', html)
         if not m:
