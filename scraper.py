@@ -47,7 +47,6 @@ def fiyat_parse(text):
         return None
 
 def zenrows_fetch(url, js_render=True):
-    """ZenRows ile sayfa çek"""
     params = {
         "apikey": ZENROWS_API_KEY,
         "url": url,
@@ -56,7 +55,7 @@ def zenrows_fetch(url, js_render=True):
         "proxy_country": "tr",
     }
     r = requests.get("https://api.zenrows.com/v1/", params=params, timeout=60)
-    print(f"  ZenRows HTTP {r.status_code} — {url[:60]}")
+    print(f"  ZenRows HTTP {r.status_code}")
     if r.status_code == 200:
         return r.text
     else:
@@ -74,61 +73,108 @@ def cek_urun(urun):
     print(f"  HTML uzunluğu: {len(html)}")
 
     if site == "n11":
-        # Fiyat
-        m = re.search(r'"displayPrice"\s*:\s*"([\d.,]+)"', html)
+        # N11'de ana fiyat JSON-LD içinde "price" olarak geçiyor
+        # Sepette fiyat: "salePrice" veya itemprop content
+        # Diğer mağaza fiyatları farklı bir alanda
+        
+        # Yöntem 1: itemprop="price" — ana ürün fiyatı
+        m = re.search(r'itemprop="price"[^>]*content="([\d.,]+)"', html)
         if m:
-            sonuc["fiyat"] = fiyat_parse(m.group(1))
-            print(f"  N11 displayPrice: {m.group(1)} → {sonuc['fiyat']}")
-        if not sonuc["fiyat"]:
-            for pat in [r'class="price[^"]*"[^>]*>\s*<[^>]+>\s*([\d.,]+\s*TL)', r'([\d.]+,\d+)\s*TL']:
-                m = re.search(pat, html)
-                if m:
-                    sonuc["fiyat"] = fiyat_parse(m.group(1))
-                    print(f"  N11 fiyat regex: {m.group(1)} → {sonuc['fiyat']}")
-                    break
-        if not sonuc["fiyat"]:
-            m = re.search(r'"salePrice"\s*:\s*(\d+)', html)
-            if m:
-                sonuc["fiyat"] = round(int(m.group(1)) / 100, 2)
-                print(f"  N11 salePrice: {sonuc['fiyat']}")
+            val = fiyat_parse(m.group(1))
+            # N11 bazen kuruş olarak veriyor
+            if val and val > 10000:
+                val = round(val / 100, 2)
+            sonuc["fiyat"] = val
+            print(f"  N11 itemprop fiyat: {m.group(1)} → {val}")
 
+        # Yöntem 2: JSON-LD offers price
+        if not sonuc["fiyat"]:
+            for ld_str in re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
+                try:
+                    ld = json.loads(ld_str)
+                    offers = ld.get("offers", {})
+                    if isinstance(offers, list):
+                        offers = offers[0]
+                    price = offers.get("price") or offers.get("lowPrice")
+                    if price:
+                        val = float(str(price).replace(",", "."))
+                        if val > 10000:
+                            val = round(val / 100, 2)
+                        sonuc["fiyat"] = val
+                        print(f"  N11 JSON-LD fiyat: {price} → {val}")
+                        break
+                except:
+                    pass
+
+        # Yorum ve puan
         m = re.search(r'"ratingValue"\s*:\s*"?([\d.]+)"?', html)
         if m: sonuc["puan"] = float(m.group(1))
-
         m = re.search(r'"reviewCount"\s*:\s*(\d+)', html)
         if not m: m = re.search(r'(\d+)\s*[Dd]eğerlendirme', html)
         if m: sonuc["yorum"] = int(m.group(1).replace('.', ''))
 
     elif site == "trendyol":
-        # Fiyat
-        for pat in [
-            r'"discountedPrice"\s*:\s*([\d.]+)',
-            r'"price"\s*:\s*([\d.]+)',
-            r'"sellingPrice"\s*:\s*([\d.]+)',
-        ]:
-            m = re.search(pat, html)
-            if m:
-                val = float(m.group(1))
-                sonuc["fiyat"] = round(val / 100, 2) if val > 100000 else val
-                print(f"  TY fiyat: {m.group(1)} → {sonuc['fiyat']}")
-                break
+        # Trendyol'da ana fiyat JSON içinde "priceInfo" altında
+        # "discountedPrice" veya "price" — ama bunlar TL cinsinden tam sayı
+        
+        # Yöntem 1: priceInfo bloğu
+        m = re.search(r'"priceInfo"\s*:\s*\{[^}]*"discountedPrice"\s*:\s*([\d.]+)', html)
+        if m:
+            sonuc["fiyat"] = float(m.group(1))
+            print(f"  TY priceInfo discountedPrice: {sonuc['fiyat']}")
+
         if not sonuc["fiyat"]:
-            matches = re.findall(r'([\d]{1,3}(?:\.\d{3})*(?:,\d+)?)\s*TL', html)
+            m = re.search(r'"priceInfo"\s*:\s*\{[^}]*"price"\s*:\s*([\d.]+)', html)
+            if m:
+                sonuc["fiyat"] = float(m.group(1))
+                print(f"  TY priceInfo price: {sonuc['fiyat']}")
+
+        # Yöntem 2: product JSON içinde
+        if not sonuc["fiyat"]:
+            # __PRODUCT_DETAIL_APP_INITIAL_STATE__ veya window.__INIT_STATE__
+            for state_pat in [
+                r'__PRODUCT_DETAIL_APP_INITIAL_STATE__\s*=\s*(\{.*?\})\s*;',
+                r'"product"\s*:\s*\{.*?"discountedPrice"\s*:\s*([\d.]+)',
+            ]:
+                m = re.search(state_pat, html, re.DOTALL)
+                if m:
+                    try:
+                        if state_pat.endswith(r'([\d.]+)'):
+                            sonuc["fiyat"] = float(m.group(1))
+                        else:
+                            data = json.loads(m.group(1))
+                            product = data.get("product", {})
+                            price_info = product.get("priceInfo", {})
+                            sonuc["fiyat"] = price_info.get("discountedPrice") or price_info.get("price")
+                        print(f"  TY state fiyat: {sonuc['fiyat']}")
+                        break
+                    except:
+                        pass
+
+        # Yöntem 3: TL fiyatları içinden ana fiyatı bul (en çok tekrar eden veya ilk büyük fiyat)
+        if not sonuc["fiyat"]:
+            # "sellingPrice" kesinlikle ana fiyat
+            m = re.search(r'"sellingPrice"\s*:\s*([\d.]+)', html)
+            if m:
+                sonuc["fiyat"] = float(m.group(1))
+                print(f"  TY sellingPrice: {sonuc['fiyat']}")
+
+        if not sonuc["fiyat"]:
+            # 3 basamaklı binli TL fiyatlarını bul, 350 gibi küçükleri atla
+            matches = re.findall(r'([\d]{1,3}(?:\.\d{3})+(?:,\d+)?)\s*TL', html)
             for m in matches:
                 val = fiyat_parse(m)
-                if val and 100 < val < 100000:
+                if val and 500 < val < 100000:
                     sonuc["fiyat"] = val
-                    print(f"  TY fiyat TL: {m} → {val}")
+                    print(f"  TY binli TL fiyat: {m} → {val}")
                     break
 
         m = re.search(r'"ratingScore"\s*:\s*([\d.]+)', html)
         if m: sonuc["puan"] = float(m.group(1))
-
         m = re.search(r'"commentCount"\s*:\s*(\d+)', html)
         if m: sonuc["yorum"] = int(m.group(1))
 
     elif site == "hepsiburada":
-        # JSON-LD
         for ld_str in re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
             try:
                 ld = json.loads(ld_str)
@@ -148,8 +194,6 @@ def cek_urun(urun):
             m = re.search(r'"price"\s*:\s*"?([\d.,]+)"?', html)
             if m:
                 sonuc["fiyat"] = fiyat_parse(m.group(1))
-                print(f"  HB regex fiyat: {sonuc['fiyat']}")
-
         if not sonuc["puan"]:
             m = re.search(r'"ratingValue"\s*:\s*"?([\d.]+)"?', html)
             if m: sonuc["puan"] = float(m.group(1))
@@ -224,7 +268,6 @@ if __name__ == "__main__":
     print("\n📊 Google Sheets güncelleniyor...")
     sheets_guncelle(veriler)
     print("✅ Tamamlandı!")
-
 
 
 									
