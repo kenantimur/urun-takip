@@ -287,7 +287,7 @@ def sheets_guncelle(veriler):
             v["puan"]  if v["puan"]  else "-",
             v["yorum"] if v["yorum"] else "-",
             f"{tarih} {saat}", v["url"]])
-        time.sleep(0.3)
+        time.sleep(1.2)
 
     print(f"✅ Google Sheets güncellendi: {tarih} {saat}")
 
