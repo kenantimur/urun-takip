@@ -7,7 +7,14 @@ import time
 import re
 import os
 
-ZENROWS_API_KEY = "ccc54f8d95eb2d79d02c97cc0dc9168ae423cee3"
+ZENROWS_API_KEYS = [
+    "174e22ec05b47f8ef8ed35a97c1f7e8a926c3bb4",
+    "4ec134284d5729d29d6b9e4fed73b6cf19e2580e",
+    "c0015e1857fb966e8b1e841a7d4793c817b7c0de",
+    "ccc54f8d95eb2d79d02c97cc0dc9168ae423cee3",  # eski, en sonda
+]
+ZENROWS_API_KEY = ZENROWS_API_KEYS[0]  # aktif key
+_key_index = 0
 
 # ============================================================
 #  TAKİP EDİLECEK ÜRÜNLER
@@ -154,17 +161,30 @@ def fiyat_parse(text):
         return None
 
 def zenrows_fetch(url):
-    params = {
-        "apikey": ZENROWS_API_KEY,
-        "url": url,
-        "js_render": "true",
-        "premium_proxy": "true",
-        "proxy_country": "tr",
-    }
-    r = requests.get("https://api.zenrows.com/v1/", params=params, timeout=60)
-    if r.status_code == 200:
-        return r.text
-    print(f"  ZenRows {r.status_code}: {r.text[:100]}")
+    global ZENROWS_API_KEY, _key_index
+    for attempt in range(len(ZENROWS_API_KEYS)):
+        params = {
+            "apikey": ZENROWS_API_KEY,
+            "url": url,
+            "js_render": "true",
+            "premium_proxy": "true",
+            "proxy_country": "tr",
+        }
+        r = requests.get("https://api.zenrows.com/v1/", params=params, timeout=60)
+        if r.status_code == 200:
+            return r.text
+        elif r.status_code == 402:
+            # Kota doldu, sonraki key'e geç
+            _key_index += 1
+            if _key_index < len(ZENROWS_API_KEYS):
+                ZENROWS_API_KEY = ZENROWS_API_KEYS[_key_index]
+                print(f"  ⚡ Key {_key_index+1}/{len(ZENROWS_API_KEYS)} geçildi")
+            else:
+                print("  ❌ Tüm key'lerin kotası doldu!")
+                return None
+        else:
+            print(f"  ZenRows {r.status_code}: {r.text[:100]}")
+            return None
     return None
 
 def cek_urun(urun):
