@@ -7,14 +7,7 @@ import time
 import re
 import os
 
-ZENROWS_API_KEYS = [
-    "174e22ec05b47f8ef8ed35a97c1f7e8a926c3bb4",
-    "4ec134284d5729d29d6b9e4fed73b6cf19e2580e",
-    "c0015e1857fb966e8b1e841a7d4793c817b7c0de",
-    "ccc54f8d95eb2d79d02c97cc0dc9168ae423cee3",  # eski, en sonda
-]
-ZENROWS_API_KEY = ZENROWS_API_KEYS[0]  # aktif key
-_key_index = 0
+SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY", "")
 
 # ============================================================
 #  TAKİP EDİLECEK ÜRÜNLER
@@ -161,30 +154,33 @@ def fiyat_parse(text):
         return None
 
 def zenrows_fetch(url):
-    global ZENROWS_API_KEY, _key_index
-    for attempt in range(len(ZENROWS_API_KEYS)):
-        params = {
-            "apikey": ZENROWS_API_KEY,
-            "url": url,
-            "js_render": "true",
-            "premium_proxy": "true",
-            "proxy_country": "tr",
+    # Önce direkt dene (N11, Trendyol için yeterli)
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36",
+            "Accept-Language": "tr-TR,tr;q=0.9",
         }
-        r = requests.get("https://api.zenrows.com/v1/", params=params, timeout=60)
+        r = requests.get(url, headers=headers, timeout=20)
+        if r.status_code == 200 and len(r.text) > 5000:
+            print(f"  Direkt HTTP 200")
+            return r.text
+    except:
+        pass
+
+    # ScraperAPI dene
+    if not SCRAPER_API_KEY:
+        print("  HATA: SCRAPER_API_KEY tanımlı değil!")
+        return None
+
+    try:
+        scraper_url = f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={requests.utils.quote(url)}&render=true&country_code=tr"
+        r = requests.get(scraper_url, timeout=60)
+        print(f"  ScraperAPI HTTP {r.status_code}")
         if r.status_code == 200:
             return r.text
-        elif r.status_code == 402:
-            # Kota doldu, sonraki key'e geç
-            _key_index += 1
-            if _key_index < len(ZENROWS_API_KEYS):
-                ZENROWS_API_KEY = ZENROWS_API_KEYS[_key_index]
-                print(f"  ⚡ Key {_key_index+1}/{len(ZENROWS_API_KEYS)} geçildi")
-            else:
-                print("  ❌ Tüm key'lerin kotası doldu!")
-                return None
-        else:
-            print(f"  ZenRows {r.status_code}: {r.text[:100]}")
-            return None
+        print(f"  ScraperAPI hata: {r.text[:150]}")
+    except Exception as e:
+        print(f"  ScraperAPI hata: {e}")
     return None
 
 def cek_urun(urun):
