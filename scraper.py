@@ -7,7 +7,12 @@ import time
 import re
 import os
 
-SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY", "")
+# API key'leri sırayla kullan — biri bitince diğerine geç
+PROXY_KEYS = [
+    ("zenrows",    "98c7eaa1eec5788ef7b3362eaac25d8b6d94b350"),   # ZenRows önce
+    ("scraperapi", os.environ.get("SCRAPER_API_KEY", "")),          # ScraperAPI sonra
+]
+_proxy_index = [0]
 
 # ============================================================
 #  TAKİP EDİLECEK ÜRÜNLER
@@ -153,7 +158,7 @@ def fiyat_parse(text):
     except:
         return None
 
-def zenrows_fetch(url):
+def proxy_fetch(url):
     # Önce direkt dene (N11, Trendyol için yeterli)
     try:
         headers = {
@@ -167,26 +172,42 @@ def zenrows_fetch(url):
     except:
         pass
 
-    # ScraperAPI dene
-    if not SCRAPER_API_KEY:
-        print("  HATA: SCRAPER_API_KEY tanımlı değil!")
-        return None
+    # Proxy sırayla dene
+    while _proxy_index[0] < len(PROXY_KEYS):
+        servis, key = PROXY_KEYS[_proxy_index[0]]
+        if not key:
+            _proxy_index[0] += 1
+            continue
+        try:
+            if servis == "zenrows":
+                proxy_url = "https://api.zenrows.com/v1/"
+                params = {"apikey": key, "url": url, "js_render": "true", "premium_proxy": "true", "proxy_country": "tr"}
+                r = requests.get(proxy_url, params=params, timeout=60)
+            else:  # scraperapi
+                proxy_url = f"http://api.scraperapi.com?api_key={key}&url={requests.utils.quote(url)}&render=true&country_code=tr&premium=true"
+                r = requests.get(proxy_url, timeout=60)
 
-    try:
-        scraper_url = f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={requests.utils.quote(url)}&render=true&country_code=tr"
-        r = requests.get(scraper_url, timeout=60)
-        print(f"  ScraperAPI HTTP {r.status_code}")
-        if r.status_code == 200:
-            return r.text
-        print(f"  ScraperAPI hata: {r.text[:150]}")
-    except Exception as e:
-        print(f"  ScraperAPI hata: {e}")
+            print(f"  {servis} HTTP {r.status_code}")
+
+            if r.status_code == 200:
+                return r.text
+            elif r.status_code in (402, 422) or "usage limit" in r.text.lower() or "quota" in r.text.lower():
+                print(f"  {servis} kotası doldu, sonraki servise geçiliyor...")
+                _proxy_index[0] += 1
+            else:
+                print(f"  {servis} hata: {r.text[:150]}")
+                return None
+        except Exception as e:
+            print(f"  {servis} hata: {e}")
+            return None
+
+    print("  HATA: Tüm proxy servisleri tükendi!")
     return None
 
 def cek_urun(urun):
     sonuc = {"fiyat": None, "puan": None, "yorum": None}
     site = urun["site"].lower()
-    html = zenrows_fetch(urun["url"])
+    html = proxy_fetch(urun["url"])
     if not html:
         return sonuc
 
