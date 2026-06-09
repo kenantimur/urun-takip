@@ -7,12 +7,18 @@ import time
 import re
 import os
 
-# API key'leri sırayla kullan — biri bitince diğerine geç
-PROXY_KEYS = [
-    ("zenrows",    "98c7eaa1eec5788ef7b3362eaac25d8b6d94b350"),   # ZenRows önce
-    ("scraperapi", os.environ.get("SCRAPER_API_KEY", "")),          # ScraperAPI sonra
+# Proxy ayarları
+PROXY_USER = os.environ.get("PROXY_USER", "")
+PROXY_PASS = os.environ.get("PROXY_PASS", "")
+PROXY_HOST = "res.proxy-seller.com"
+PROXY_PORT = "10000"
+
+# Fallback API'ler (proxy başarısız olursa)
+FALLBACK_KEYS = [
+    ("zenrows",    "98c7eaa1eec5788ef7b3362eaac25d8b6d94b350"),
+    ("scraperapi", os.environ.get("SCRAPER_API_KEY", "")),
 ]
-_proxy_index = [0]
+_fallback_index = [0]
 
 # ============================================================
 #  TAKİP EDİLECEK ÜRÜNLER
@@ -159,12 +165,13 @@ def fiyat_parse(text):
         return None
 
 def proxy_fetch(url):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36",
+        "Accept-Language": "tr-TR,tr;q=0.9",
+    }
+
     # Önce direkt dene (N11, Trendyol için yeterli)
     try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36",
-            "Accept-Language": "tr-TR,tr;q=0.9",
-        }
         r = requests.get(url, headers=headers, timeout=20)
         if r.status_code == 200 and len(r.text) > 5000:
             print(f"  Direkt HTTP 200")
@@ -172,28 +179,43 @@ def proxy_fetch(url):
     except:
         pass
 
-    # Proxy sırayla dene
-    while _proxy_index[0] < len(PROXY_KEYS):
-        servis, key = PROXY_KEYS[_proxy_index[0]]
+    # Konut proxy ile dene
+    if PROXY_USER and PROXY_PASS:
+        try:
+            proxies = {
+                "http":  f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY_HOST}:{PROXY_PORT}",
+                "https": f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY_HOST}:{PROXY_PORT}",
+            }
+            r = requests.get(url, headers=headers, proxies=proxies, timeout=30)
+            print(f"  Konut proxy HTTP {r.status_code} ({len(r.text)} karakter)")
+            if r.status_code == 200 and len(r.text) > 5000:
+                return r.text
+        except Exception as e:
+            print(f"  Konut proxy hata: {e}")
+
+    # Fallback: ZenRows → ScraperAPI
+    while _fallback_index[0] < len(FALLBACK_KEYS):
+        servis, key = FALLBACK_KEYS[_fallback_index[0]]
         if not key:
-            _proxy_index[0] += 1
+            _fallback_index[0] += 1
             continue
         try:
             if servis == "zenrows":
-                proxy_url = "https://api.zenrows.com/v1/"
-                params = {"apikey": key, "url": url, "js_render": "true", "premium_proxy": "true", "proxy_country": "tr"}
-                r = requests.get(proxy_url, params=params, timeout=60)
-            else:  # scraperapi
-                proxy_url = f"http://api.scraperapi.com?api_key={key}&url={requests.utils.quote(url)}&render=true&country_code=tr&premium=true"
-                r = requests.get(proxy_url, timeout=60)
-
+                r = requests.get("https://api.zenrows.com/v1/", params={
+                    "apikey": key, "url": url, "js_render": "true",
+                    "premium_proxy": "true", "proxy_country": "tr"
+                }, timeout=60)
+            else:
+                r = requests.get(
+                    f"http://api.scraperapi.com?api_key={key}&url={requests.utils.quote(url)}&render=true&country_code=tr&premium=true",
+                    timeout=60
+                )
             print(f"  {servis} HTTP {r.status_code}")
-
             if r.status_code == 200:
                 return r.text
-            elif r.status_code in (402, 422) or "usage limit" in r.text.lower() or "quota" in r.text.lower():
+            elif r.status_code in (402, 422) or "usage limit" in r.text.lower():
                 print(f"  {servis} kotası doldu, sonraki servise geçiliyor...")
-                _proxy_index[0] += 1
+                _fallback_index[0] += 1
             else:
                 print(f"  {servis} hata: {r.text[:150]}")
                 return None
@@ -201,7 +223,7 @@ def proxy_fetch(url):
             print(f"  {servis} hata: {e}")
             return None
 
-    print("  HATA: Tüm proxy servisleri tükendi!")
+    print("  HATA: Tüm servisler tükendi!")
     return None
 
 def cek_urun(urun):
