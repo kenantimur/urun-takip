@@ -13,13 +13,6 @@ PROXY_PASS = os.environ.get("PROXY_PASS", "")
 PROXY_HOST = "res.proxy-seller.com"
 PROXY_PORT = "10000"
 
-# Fallback API'ler (proxy başarısız olursa)
-FALLBACK_KEYS = [
-    ("zenrows",    "98c7eaa1eec5788ef7b3362eaac25d8b6d94b350"),
-    ("scraperapi", os.environ.get("SCRAPER_API_KEY", "")),
-]
-_fallback_index = [0]
-
 # ============================================================
 #  TAKİP EDİLECEK ÜRÜNLER
 #  Yeni ürün eklemek: listeye {"site": "...", "ad": "...", "url": "..."} satırı ekle
@@ -179,51 +172,41 @@ def proxy_fetch(url):
     except:
         pass
 
-    # Konut proxy ile dene
-    if PROXY_USER and PROXY_PASS:
-        try:
-            proxies = {
-                "http":  f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY_HOST}:{PROXY_PORT}",
-                "https": f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY_HOST}:{PROXY_PORT}",
-            }
-            r = requests.get(url, headers=headers, proxies=proxies, timeout=30)
-            print(f"  Konut proxy HTTP {r.status_code} ({len(r.text)} karakter)")
-            if r.status_code == 200 and len(r.text) > 5000:
-                return r.text
-        except Exception as e:
-            print(f"  Konut proxy hata: {e}")
+    # Playwright + konut proxy ile dene (Hepsiburada için)
+    try:
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=[
+                    f"--proxy-server=http://{PROXY_HOST}:{PROXY_PORT}",
+                    "--no-sandbox",
+                    "--disable-blink-features=AutomationControlled",
+                ]
+            )
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36",
+                locale="tr-TR",
+                timezone_id="Europe/Istanbul",
+                http_credentials={"username": PROXY_USER, "password": PROXY_PASS},
+            )
+            context.add_init_script("""
+                Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+                window.chrome = { runtime: {} };
+            """)
+            page = context.new_page()
+            page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            import time
+            time.sleep(3)
+            html = page.content()
+            browser.close()
+            print(f"  Playwright+proxy HTTP OK ({len(html)} karakter)")
+            if len(html) > 5000:
+                return html
+    except Exception as e:
+        print(f"  Playwright+proxy hata: {e}")
 
-    # Fallback: ZenRows → ScraperAPI
-    while _fallback_index[0] < len(FALLBACK_KEYS):
-        servis, key = FALLBACK_KEYS[_fallback_index[0]]
-        if not key:
-            _fallback_index[0] += 1
-            continue
-        try:
-            if servis == "zenrows":
-                r = requests.get("https://api.zenrows.com/v1/", params={
-                    "apikey": key, "url": url, "js_render": "true",
-                    "premium_proxy": "true", "proxy_country": "tr"
-                }, timeout=60)
-            else:
-                r = requests.get(
-                    f"http://api.scraperapi.com?api_key={key}&url={requests.utils.quote(url)}&render=true&country_code=tr&premium=true",
-                    timeout=60
-                )
-            print(f"  {servis} HTTP {r.status_code}")
-            if r.status_code == 200:
-                return r.text
-            elif r.status_code in (402, 422) or "usage limit" in r.text.lower():
-                print(f"  {servis} kotası doldu, sonraki servise geçiliyor...")
-                _fallback_index[0] += 1
-            else:
-                print(f"  {servis} hata: {r.text[:150]}")
-                return None
-        except Exception as e:
-            print(f"  {servis} hata: {e}")
-            return None
-
-    print("  HATA: Tüm servisler tükendi!")
+    print("  HATA: Tüm yöntemler başarısız!")
     return None
 
 def cek_urun(urun):
