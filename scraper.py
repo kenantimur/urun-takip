@@ -195,14 +195,20 @@ def proxy_fetch(url):
                 window.chrome = { runtime: {} };
             """)
             page = context.new_page()
-            page.goto(url, wait_until="domcontentloaded", timeout=30000)
             import time
-            time.sleep(3)
+            page.goto(url, wait_until="networkidle", timeout=45000)
+            time.sleep(5)
+            # JS challenge geçildi mi kontrol et
             html = page.content()
+            if len(html) < 5000:
+                # Tekrar bekle
+                time.sleep(5)
+                html = page.content()
             browser.close()
-            print(f"  Playwright+proxy HTTP OK ({len(html)} karakter)")
+            print(f"  Playwright+proxy OK ({len(html)} karakter)")
             if len(html) > 5000:
                 return html
+            print(f"  Playwright+proxy güvenlik sayfası ({len(html)} karakter)")
     except Exception as e:
         print(f"  Playwright+proxy hata: {e}")
 
