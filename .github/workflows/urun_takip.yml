@@ -18,13 +18,15 @@ jobs:
           python-version: '3.11'
 
       - name: Kütüphaneleri yükle
-        run: pip install requests gspread google-auth
+        run: |
+          pip install requests gspread google-auth playwright
+          playwright install chromium
+          playwright install-deps chromium
 
       - name: Scripti çalıştır
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
-          SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
           PROXY_USER: ${{ secrets.PROXY_USER }}
           PROXY_PASS: ${{ secrets.PROXY_PASS }}
         run: python scraper.py
