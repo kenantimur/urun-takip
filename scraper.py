@@ -7,11 +7,7 @@ import time
 import re
 import os
 
-# Proxy ayarları
-PROXY_USER = os.environ.get("PROXY_USER", "")
-PROXY_PASS = os.environ.get("PROXY_PASS", "")
-PROXY_HOST = "res.proxy-seller.com"
-PROXY_PORT = "10000"
+ZENROWS_API_KEY = "890b4485ccc0e6e82ced6ccff8190fb2dc5cf249"
 
 # ============================================================
 #  TAKİP EDİLECEK ÜRÜNLER
@@ -172,47 +168,23 @@ def proxy_fetch(url):
     except:
         pass
 
-    # Playwright + konut proxy ile dene (Hepsiburada için)
+    # ZenRows ile dene
     try:
-        from playwright.sync_api import sync_playwright
-        with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,
-                args=[
-                    f"--proxy-server=http://{PROXY_HOST}:{PROXY_PORT}",
-                    "--no-sandbox",
-                    "--disable-blink-features=AutomationControlled",
-                ]
-            )
-            context = browser.new_context(
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36",
-                locale="tr-TR",
-                timezone_id="Europe/Istanbul",
-                http_credentials={"username": PROXY_USER, "password": PROXY_PASS},
-            )
-            context.add_init_script("""
-                Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-                window.chrome = { runtime: {} };
-            """)
-            page = context.new_page()
-            import time
-            page.goto(url, wait_until="networkidle", timeout=45000)
-            time.sleep(5)
-            # JS challenge geçildi mi kontrol et
-            html = page.content()
-            if len(html) < 5000:
-                # Tekrar bekle
-                time.sleep(5)
-                html = page.content()
-            browser.close()
-            print(f"  Playwright+proxy OK ({len(html)} karakter)")
-            if len(html) > 5000:
-                return html
-            print(f"  Playwright+proxy güvenlik sayfası ({len(html)} karakter)")
+        params = {
+            "apikey": ZENROWS_API_KEY,
+            "url": url,
+            "js_render": "true",
+            "premium_proxy": "true",
+            "proxy_country": "tr",
+        }
+        r = requests.get("https://api.zenrows.com/v1/", params=params, timeout=60)
+        print(f"  ZenRows HTTP {r.status_code}")
+        if r.status_code == 200:
+            return r.text
+        print(f"  ZenRows hata: {r.text[:150]}")
     except Exception as e:
-        print(f"  Playwright+proxy hata: {e}")
+        print(f"  ZenRows hata: {e}")
 
-    print("  HATA: Tüm yöntemler başarısız!")
     return None
 
 def cek_urun(urun):
