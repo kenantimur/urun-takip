@@ -516,30 +516,43 @@ def sheets_guncelle(veriler):
         ])
         time.sleep(1.2)
 
-    # ── Ana sheet (güncel) ──
+    # ── Adım 1: Mevcut "Ürün Takip" sayfasını tarih sayfasına kopyala ──
     try:
-        ws = sh.worksheet("Ürün Takip")
-        ws.clear()
-    except:
-        ws = sh.add_worksheet("Ürün Takip", rows=200, cols=10)
-    ws.append_row(basliklar)
-    ws.format(f"A1:I1", header_format)
-    for v in veriler:
-        satir_yaz(ws, v)
-    print(f"  Ana sheet güncellendi.")
+        ana_ws = sh.worksheet("Ürün Takip")
+        mevcut_veriler = ana_ws.get_all_values()
+        if len(mevcut_veriler) > 1:  # Başlık + en az 1 satır varsa
+            try:
+                arsiv = sh.worksheet(tarih)
+                arsiv.clear()
+            except:
+                # Yeni sayfa oluştur ve 2. konuma taşı
+                arsiv = sh.add_worksheet(tarih, rows=300, cols=10)
+                # "Ürün Takip"ten sonraya taşı (index 1)
+                sh.reorder_sheets([ana_ws.id, arsiv.id] + [ws.id for ws in sh.worksheets() if ws.title not in ("Ürün Takip", tarih)])
 
-    # ── Tarih arşiv sayfası ──
+            arsiv.update(mevcut_veriler, "A1")
+            arsiv.format("A1:I1", header_format)
+            print(f"  Arşiv sayfası '{tarih}' oluşturuldu.")
+        else:
+            print(f"  Ana sayfada veri yok, arşiv atlandı.")
+    except Exception as e:
+        print(f"  Arşiv hatası: {e}")
+
+    # ── Adım 2: Ana sayfayı temizle ve yeni verileri yaz ──
     try:
-        ts = sh.worksheet(tarih)
-        ts.clear()
+        ana_ws = sh.worksheet("Ürün Takip")
+        ana_ws.clear()
     except:
-        ts = sh.add_worksheet(tarih, rows=200, cols=10)
-    ts.append_row(basliklar)
-    ts.format(f"A1:I1", header_format)
-    for v in veriler:
-        satir_yaz(ts, v)
-    print(f"  Arşiv sayfası '{tarih}' güncellendi.")
+        ana_ws = sh.add_worksheet("Ürün Takip", rows=300, cols=10)
+        # Ana sayfayı en başa taşı
+        all_sheets = sh.worksheets()
+        sh.reorder_sheets([ana_ws.id] + [ws.id for ws in all_sheets if ws.title != "Ürün Takip"])
 
+    ana_ws.append_row(basliklar)
+    ana_ws.format("A1:I1", header_format)
+    for v in veriler:
+        satir_yaz(ana_ws, v)
+    print(f"  Ana sheet güncellendi: {len(veriler)} ürün")
     print(f"✅ Google Sheets güncellendi: {tarih} {saat}")
 
 if __name__ == "__main__":
