@@ -428,12 +428,24 @@ def cek_urun(urun):
         if m: sonuc["yorum"] = int(m.group(1).replace('.', ''))
 
     elif site == "trendyol":
-        for pat in [r'"priceInfo"\s*:\s*\{[^}]*"discountedPrice"\s*:\s*([\d.]+)',
+        # DEBUG: hangi key'ler var göster
+        for key in ["discountedPrice", "sellingPrice", "priceInfo", "ratingScore", "commentCount", "__NEXT_DATA__"]:
+            idx = html.find(key)
+            if idx != -1:
+                print(f"    DBG {key}: {html[idx:idx+80]}")
+            else:
+                print(f"    DBG {key}: BULUNAMADI")
+        print(f"    DBG HTML ilk 300 karakter: {html[:300]}")
+
+        for pat in [r'"discountedPrice"\s*:\s*\{[^}]*"value"\s*:\s*([\d.]+)',
+                    r'"discountedPrice"\s*:\s*([\d.]+)',
+                    r'"priceInfo"\s*:\s*\{[^}]*"discountedPrice"\s*:\s*([\d.]+)',
                     r'"priceInfo"\s*:\s*\{[^}]*"price"\s*:\s*([\d.]+)',
                     r'"sellingPrice"\s*:\s*([\d.]+)']:
             m = re.search(pat, html)
             if m:
                 sonuc["fiyat"] = float(m.group(1))
+                print(f"    DBG fiyat eşleşti: {pat} -> {m.group(1)}")
                 break
         if not sonuc["fiyat"]:
             matches = re.findall(r'([\d]{1,3}(?:\.\d{3})+(?:,\d+)?)\s*TL', html)
