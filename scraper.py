@@ -388,7 +388,7 @@ def proxy_fetch(url, site=None):
         except:
             pass
 
-    # ZenRows ile dene — Trendyol için ülke/dil cookie'si zorla
+    # ZenRows ile dene
     try:
         params = {
             "apikey": ZENROWS_API_KEY,
@@ -397,24 +397,15 @@ def proxy_fetch(url, site=None):
             "premium_proxy": "true",
             "proxy_country": "tr",
         }
+        extra_headers = {}
         if site == "trendyol":
-            # Trendyol TR sürümünü zorlamak için custom header/cookie
-            params["custom_headers"] = "true"
-            params["wait_for"] = ".product-price-container, [class*=\"prc-dsc\"]"
+            extra_headers = {"Cookie": "storefrontId=1; countryCode=TR; language=tr"}
 
-        r = requests.get("https://api.zenrows.com/v1/", params=params, timeout=60,
-                          headers={"Accept-Language": "tr-TR,tr;q=0.9", "Cookie": "ConsentSelectedLocale=tr; storefrontId=1; countryCode=TR; language=tr"} if site == "trendyol" else {})
+        r = requests.get("https://api.zenrows.com/v1/", params=params, timeout=90, headers=extra_headers)
         print(f"  ZenRows HTTP {r.status_code}")
         if r.status_code == 200:
-            # Ülke seçim sayfası mı kontrol et
-            if "m-country-selection" in r.text or "country-selection" in r.text:
-                print(f"  ZenRows ülke seçim sayfası döndü, tekrar deneniyor...")
-                # ikinci deneme: TR'yi zorla url'e ekleyerek
-                r2 = requests.get("https://api.zenrows.com/v1/", params=params, timeout=60,
-                                   headers={"Accept-Language": "tr-TR,tr;q=0.9,en;q=0.1"})
-                if r2.status_code == 200 and "m-country-selection" not in r2.text:
-                    return r2.text
-                print(f"  ZenRows ikinci deneme de ülke seçim sayfası döndü")
+            if "m-country-selection" in r.text:
+                print(f"  ZenRows ülke seçim sayfası döndü")
                 return None
             return r.text
         print(f"  ZenRows hata: {r.text[:150]}")
@@ -426,7 +417,12 @@ def proxy_fetch(url, site=None):
 def cek_urun(urun):
     sonuc = {"fiyat": None, "puan": None, "yorum": None, "satici": None}
     site = urun["site"].lower()
-    html = proxy_fetch(urun["url"], site)
+    url = urun["url"]
+    # Trendyol için TR sürümünü zorla
+    if site == "trendyol" and "storefrontId" not in url:
+        sep = "&" if "?" in url else "?"
+        url = url + sep + "storefrontId=1&culture=tr-TR"
+    html = proxy_fetch(url, site)
     if not html:
         return sonuc
 
