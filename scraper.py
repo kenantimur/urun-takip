@@ -435,7 +435,18 @@ def cek_urun(urun):
                 print(f"    DBG {key}: {html[idx:idx+80]}")
             else:
                 print(f"    DBG {key}: BULUNAMADI")
-        print(f"    DBG HTML ilk 300 karakter: {html[:300]}")
+        print(f"    DBG HTML uzunluk: {len(html)}")
+        print(f"    DBG HTML 300-1500: {html[300:1500]}")
+        # body içeriğine bak
+        body_idx = html.find('<body')
+        if body_idx != -1:
+            print(f"    DBG body sonrası: {html[body_idx:body_idx+500]}")
+        # fiyat ile ilgili herhangi bir TL geçen yer var mı
+        tl_idx = html.find('TL')
+        if tl_idx != -1:
+            print(f"    DBG ilk TL civarı: {html[max(0,tl_idx-100):tl_idx+50]}")
+        else:
+            print(f"    DBG 'TL' hiç bulunamadı sayfada")
 
         for pat in [r'"discountedPrice"\s*:\s*\{[^}]*"value"\s*:\s*([\d.]+)',
                     r'"discountedPrice"\s*:\s*([\d.]+)',
