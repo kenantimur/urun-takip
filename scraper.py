@@ -372,22 +372,23 @@ def fiyat_parse(text):
     except:
         return None
 
-def proxy_fetch(url):
+def proxy_fetch(url, site=None):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36",
         "Accept-Language": "tr-TR,tr;q=0.9",
     }
 
-    # Önce direkt dene (N11, Trendyol için yeterli)
-    try:
-        r = requests.get(url, headers=headers, timeout=20)
-        if r.status_code == 200 and len(r.text) > 5000:
-            print(f"  Direkt HTTP 200")
-            return r.text
-    except:
-        pass
+    # Önce direkt dene (sadece N11 için yeterli; Trendyol/Hepsiburada ülke/bot engeli koyuyor)
+    if site != "trendyol" and site != "hepsiburada":
+        try:
+            r = requests.get(url, headers=headers, timeout=20)
+            if r.status_code == 200 and len(r.text) > 5000:
+                print(f"  Direkt HTTP 200")
+                return r.text
+        except:
+            pass
 
-    # ZenRows ile dene
+    # ZenRows ile dene — Trendyol için ülke/dil cookie'si zorla
     try:
         params = {
             "apikey": ZENROWS_API_KEY,
@@ -396,9 +397,25 @@ def proxy_fetch(url):
             "premium_proxy": "true",
             "proxy_country": "tr",
         }
-        r = requests.get("https://api.zenrows.com/v1/", params=params, timeout=60)
+        if site == "trendyol":
+            # Trendyol TR sürümünü zorlamak için custom header/cookie
+            params["custom_headers"] = "true"
+            params["wait_for"] = ".product-price-container, [class*=\"prc-dsc\"]"
+
+        r = requests.get("https://api.zenrows.com/v1/", params=params, timeout=60,
+                          headers={"Accept-Language": "tr-TR,tr;q=0.9", "Cookie": "ConsentSelectedLocale=tr; storefrontId=1; countryCode=TR; language=tr"} if site == "trendyol" else {})
         print(f"  ZenRows HTTP {r.status_code}")
         if r.status_code == 200:
+            # Ülke seçim sayfası mı kontrol et
+            if "m-country-selection" in r.text or "country-selection" in r.text:
+                print(f"  ZenRows ülke seçim sayfası döndü, tekrar deneniyor...")
+                # ikinci deneme: TR'yi zorla url'e ekleyerek
+                r2 = requests.get("https://api.zenrows.com/v1/", params=params, timeout=60,
+                                   headers={"Accept-Language": "tr-TR,tr;q=0.9,en;q=0.1"})
+                if r2.status_code == 200 and "m-country-selection" not in r2.text:
+                    return r2.text
+                print(f"  ZenRows ikinci deneme de ülke seçim sayfası döndü")
+                return None
             return r.text
         print(f"  ZenRows hata: {r.text[:150]}")
     except Exception as e:
@@ -409,7 +426,7 @@ def proxy_fetch(url):
 def cek_urun(urun):
     sonuc = {"fiyat": None, "puan": None, "yorum": None, "satici": None}
     site = urun["site"].lower()
-    html = proxy_fetch(urun["url"])
+    html = proxy_fetch(urun["url"], site)
     if not html:
         return sonuc
 
@@ -428,26 +445,6 @@ def cek_urun(urun):
         if m: sonuc["yorum"] = int(m.group(1).replace('.', ''))
 
     elif site == "trendyol":
-        # DEBUG: hangi key'ler var göster
-        for key in ["discountedPrice", "sellingPrice", "priceInfo", "ratingScore", "commentCount", "__NEXT_DATA__"]:
-            idx = html.find(key)
-            if idx != -1:
-                print(f"    DBG {key}: {html[idx:idx+80]}")
-            else:
-                print(f"    DBG {key}: BULUNAMADI")
-        print(f"    DBG HTML uzunluk: {len(html)}")
-        print(f"    DBG HTML 300-1500: {html[300:1500]}")
-        # body içeriğine bak
-        body_idx = html.find('<body')
-        if body_idx != -1:
-            print(f"    DBG body sonrası: {html[body_idx:body_idx+500]}")
-        # fiyat ile ilgili herhangi bir TL geçen yer var mı
-        tl_idx = html.find('TL')
-        if tl_idx != -1:
-            print(f"    DBG ilk TL civarı: {html[max(0,tl_idx-100):tl_idx+50]}")
-        else:
-            print(f"    DBG 'TL' hiç bulunamadı sayfada")
-
         for pat in [r'"discountedPrice"\s*:\s*\{[^}]*"value"\s*:\s*([\d.]+)',
                     r'"discountedPrice"\s*:\s*([\d.]+)',
                     r'"priceInfo"\s*:\s*\{[^}]*"discountedPrice"\s*:\s*([\d.]+)',
@@ -456,7 +453,6 @@ def cek_urun(urun):
             m = re.search(pat, html)
             if m:
                 sonuc["fiyat"] = float(m.group(1))
-                print(f"    DBG fiyat eşleşti: {pat} -> {m.group(1)}")
                 break
         if not sonuc["fiyat"]:
             matches = re.findall(r'([\d]{1,3}(?:\.\d{3})+(?:,\d+)?)\s*TL', html)
