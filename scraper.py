@@ -457,10 +457,46 @@ def cek_urun(urun):
                 if val and 500 < val < 100000:
                     sonuc["fiyat"] = val
                     break
-        m = re.search(r'"ratingScore"\s*:\s*([\d.]+)', html)
-        if m: sonuc["puan"] = float(m.group(1))
+
+        # JSON-LD üzerinden puan ve satıcı
+        for ld_str in re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
+            try:
+                ld = json.loads(ld_str)
+                agg = ld.get("aggregateRating", {})
+                if agg.get("ratingValue"):
+                    sonuc["puan"] = float(str(agg["ratingValue"]).replace(",", "."))
+                if agg.get("reviewCount") and not sonuc["yorum"]:
+                    sonuc["yorum"] = int(agg["reviewCount"])
+                offers = ld.get("offers", {})
+                if isinstance(offers, list): offers = offers[0]
+                seller = offers.get("seller", {})
+                if isinstance(seller, dict) and seller.get("name"):
+                    sonuc["satici"] = seller["name"]
+            except:
+                pass
+
+        if not sonuc["puan"]:
+            for pat in [r'"ratingScore"\s*:\s*\{[^}]*"averageRating"\s*:\s*([\d.]+)',
+                        r'"ratingScore"\s*:\s*([\d.]+)',
+                        r'"averageRating"\s*:\s*"?([\d.]+)"?',
+                        r'"rate"\s*:\s*([\d.]+)']:
+                m = re.search(pat, html)
+                if m:
+                    sonuc["puan"] = float(m.group(1))
+                    break
+
         m = re.search(r'"commentCount"\s*:\s*(\d+)', html)
         if m: sonuc["yorum"] = int(m.group(1))
+
+        if not sonuc["satici"]:
+            for pat in [r'"merchantName"\s*:\s*"([^"]+)"',
+                        r'"sellerName"\s*:\s*"([^"]+)"',
+                        r'"storeName"\s*:\s*"([^"]+)"',
+                        r'class="[^"]*merchant-name[^"]*"[^>]*>\s*([^<]+)']:
+                m = re.search(pat, html)
+                if m:
+                    sonuc["satici"] = m.group(1).strip()
+                    break
 
     elif site == "hepsiburada":
         for ld_str in re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
