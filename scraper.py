@@ -1,7 +1,7 @@
 import requests
 import gspread
 from google.oauth2.service_account import Credentials
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import time
 import re
@@ -498,6 +498,12 @@ def cek_urun(urun):
                     sonuc["satici"] = m.group(1).strip()
                     break
 
+        if not sonuc["satici"]:
+            for key in ["merchant", "Merchant", "seller", "Seller", "satıcı", "Satıcı", "storeName", "shopName"]:
+                idx = html.find(key)
+                if idx != -1:
+                    print(f"    DBG satıcı anahtar '{key}': {html[idx:idx+120]}")
+
     elif site == "hepsiburada":
         for ld_str in re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
             try:
@@ -546,6 +552,7 @@ def sheets_guncelle(veriler):
     simdi = datetime.now()
     tarih = simdi.strftime("%d.%m.%Y")
     saat  = simdi.strftime("%H:%M")
+    dun_tarih = (simdi - timedelta(days=1)).strftime("%d.%m.%Y")
 
     basliklar = ["Ölçü", "Site", "Ürün Adı", "Satıcı", "Fiyat (TL)", "Puan", "Yorum Sayısı", "Son Güncelleme", "URL"]
     header_format = {
@@ -567,23 +574,20 @@ def sheets_guncelle(veriler):
         ])
         time.sleep(1.2)
 
-    # ── Adım 1: Mevcut "Ürün Takip" sayfasını tarih sayfasına kopyala ──
+    # ── Adım 1: Mevcut "Ürün Takip" sayfasını dünün tarihiyle arşivle ──
     try:
         ana_ws = sh.worksheet("Ürün Takip")
         mevcut_veriler = ana_ws.get_all_values()
         if len(mevcut_veriler) > 1:  # Başlık + en az 1 satır varsa
             try:
-                arsiv = sh.worksheet(tarih)
+                arsiv = sh.worksheet(dun_tarih)
                 arsiv.clear()
             except:
-                # Yeni sayfa oluştur ve 2. konuma taşı
-                arsiv = sh.add_worksheet(tarih, rows=300, cols=10)
-                # "Ürün Takip"ten sonraya taşı (index 1)
-                sh.reorder_sheets([ana_ws.id, arsiv.id] + [ws.id for ws in sh.worksheets() if ws.title not in ("Ürün Takip", tarih)])
+                arsiv = sh.add_worksheet(dun_tarih, rows=300, cols=10)
 
             arsiv.update(mevcut_veriler, "A1")
             arsiv.format("A1:I1", header_format)
-            print(f"  Arşiv sayfası '{tarih}' oluşturuldu.")
+            print(f"  Arşiv sayfası '{dun_tarih}' oluşturuldu.")
         else:
             print(f"  Ana sayfada veri yok, arşiv atlandı.")
     except Exception as e:
@@ -595,9 +599,26 @@ def sheets_guncelle(veriler):
         ana_ws.clear()
     except:
         ana_ws = sh.add_worksheet("Ürün Takip", rows=300, cols=10)
-        # Ana sayfayı en başa taşı
+
+    ana_ws.append_row(basliklar)
+    ana_ws.format("A1:I1", header_format)
+    for v in veriler:
+        satir_yaz(ana_ws, v)
+
+    # ── Adım 3: Sayfa sırasını garanti et — Ürün Takip en başta, dünün arşivi 2. sırada ──
+    try:
         all_sheets = sh.worksheets()
-        sh.reorder_sheets([ana_ws.id] + [ws.id for ws in all_sheets if ws.title != "Ürün Takip"])
+        ana_ws = sh.worksheet("Ürün Takip")
+        diger = [ws for ws in all_sheets if ws.title != "Ürün Takip"]
+        try:
+            dun_ws = sh.worksheet(dun_tarih)
+            diger = [ws for ws in diger if ws.title != dun_tarih]
+            yeni_sira = [ana_ws.id, dun_ws.id] + [ws.id for ws in diger]
+        except:
+            yeni_sira = [ana_ws.id] + [ws.id for ws in diger]
+        sh.reorder_sheets(yeni_sira)
+    except Exception as e:
+        print(f"  Sıralama hatası: {e}")
 
     ana_ws.append_row(basliklar)
     ana_ws.format("A1:I1", header_format)
