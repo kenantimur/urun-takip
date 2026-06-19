@@ -256,106 +256,54 @@ URUNLER = [
     # ── e240 ──────────────────────────────────────────────
     {"olcu": "e240", "site": "Trendyol", "ad": "Rovline Akıllı Projeksiyon Perdesi, Wi-Fi + Rf, Motorlu, 240x200, Sesle Kontrol, Kumanda ve Mobil Uygulama Kontrollü, Tuya uyumlu", "url": "https://www.trendyol.com/pd/rovline/akilli-projeksiyon-perdesi-wi-fi-rf-motorlu-240x200-sesle-kontrol-kumanda-ve-mobil-uygulama-kontrollu-tuya-uyumlu-p-1147920610?choicennenabled=false&subPathStrategy=no-subpath&boutiqueId=61&merchantId=206489"},
     # ── e300 ──────────────────────────────────────────────
-    {"olcu": "e300", "site": "Trendyol", "ad": "Gamma Screens 300x225 Motorlu Projeksiyon Perdesi", "url": "https://www.trendyol.com/gamma-screens/300x225-motorlu-projeksiyon-perdesi-p-32240151?boutiqueId=61&merchantId=108524"},
     # ── p140 ──────────────────────────────────────────────
-    {"olcu": "p140", "site": "Trendyol", "ad": "CODEGEN 145x82 cm Taşınabilir Portatif Pull Up Floor Screen Projeksiyon Perdesi", "url": "https://www.trendyol.com/codegen/145x82-cm-tasinabilir-portatif-pull-up-floor-screen-projeksiyon-perdesi-p-994418874?boutiqueId=61&merchantId=1058560"},
     # ── s150 ──────────────────────────────────────────────
-    {"olcu": "s150", "site": "Trendyol", "ad": "Genel Markalar Zincirli Projeksiyon Perdesi 160x160", "url": "https://www.trendyol.com/genel-markalar/zincirli-projeksiyon-perdesi-160x160-p-109199334?boutiqueId=61&merchantId=402585"},
     # ── s180 ──────────────────────────────────────────────
-    {"olcu": "s180", "site": "Trendyol", "ad": "CODEGEN AX-18 180x180 cm Storlu Manuel Projeksiyon Perdesi (Arkası Siyah Fonlu)", "url": "https://www.trendyol.com/codegen/ax-18-180x180-cm-storlu-manuel-projeksiyon-perdesi-arkasi-siyah-fonlu-p-2704854?boutiqueId=61&merchantId=1058560"},
     # ── s200 ──────────────────────────────────────────────
-    {"olcu": "s200", "site": "Trendyol", "ad": "Gamma Screens 200x200 Storlu Projeksiyon Perdesi", "url": "https://www.trendyol.com/gamma-screens/200x200-storlu-projeksiyon-perdesi-p-49002023?boutiqueId=61&merchantId=108524"},
-    {"olcu": "s200", "site": "Trendyol", "ad": "GÖLGE STOR Manuel En200cm Boy180cm Projeksiyon Perdesi Yeni Akıllı Kumaş Blackout-ışık Geçirmez 4k", "url": "https://www.trendyol.com/golge-stor/manuel-en200cm-boy180cm-projeksiyon-perdesi-yeni-akilli-kumas-blackout-isik-gecirmez-4k-p-366301882?boutiqueId=61&merchantId=585843"},
     # ── s240 ──────────────────────────────────────────────
-    {"olcu": "s240", "site": "Trendyol", "ad": "Gamma Screens 240x200 Storlu Projeksiyon Perdesi", "url": "https://www.trendyol.com/gamma-screens/240x200-storlu-projeksiyon-perdesi-p-32240762?boutiqueId=61&merchantId=108524"},
-    {"olcu": "s240", "site": "Trendyol", "ad": "GÖLGE STOR Manuel En240cm Boy190cm Projeksiyon Perdesi Yeni Akıllı Kumaş Blackout-ışık Geçirmez 4k 8k Hd", "url": "https://www.trendyol.com/golge-stor/manuel-en240cm-boy190cm-projeksiyon-perdesi-yeni-akilli-kumas-blackout-isik-gecirmez-4k-8k-hd-p-372039412?boutiqueId=61&merchantId=585843"},
-    {"olcu": "s240", "site": "Trendyol", "ad": "Genel Markalar Storlu Arkası Siyah Ithal Projeksiyon Perdesi-beyaz Kasa 240 X 200 Cm", "url": "https://www.trendyol.com/genel-markalar/storlu-arkasi-siyah-ithal-projeksiyon-perdesi-beyaz-kasa-240-x-200-cm-p-66169635?boutiqueId=61&merchantId=132091"},
     # ── t150 ──────────────────────────────────────────────
-    {"olcu": "t150", "site": "Trendyol", "ad": "Gamma Screens 150x150 Tripod Ayaklı Projeksiyon Perdesi", "url": "https://www.trendyol.com/gamma-screens/150x150-tripod-ayakli-projeksiyon-perdesi-p-1129363771?boutiqueId=61&merchantId=108524"},
     # ── t180 ──────────────────────────────────────────────
-    {"olcu": "t180", "site": "Trendyol", "ad": "Gamma Screens 180x180 Tripod Ayaklı Projeksiyon Perdesi", "url": "https://www.trendyol.com/gamma-screens/180x180-tripod-ayakli-projeksiyon-perdesi-p-782821120?boutiqueId=61&merchantId=108524"},
     # ── t200 ──────────────────────────────────────────────
-    {"olcu": "t200", "site": "Trendyol", "ad": "GÖLGE STOR ( Tripodlu ) En200cm Boy115cm Projeksiyon Perdesi Ayaklı Taşınabilir Yeni Akıllı Kumaş Işık Geçirmez", "url": "https://www.trendyol.com/golge-stor/tripodlu-en200cm-boy115cm-projeksiyon-perdesi-ayakli-tasinabilir-yeni-akilli-kumas-isik-gecirmez-p-872481327?boutiqueId=61&merchantId=585843"},
     # ── t220 ──────────────────────────────────────────────
-    {"olcu": "t220", "site": "Trendyol", "ad": "Havit 220x125cm Ayarlanabilir 100inç 16:9 Boyut Ayaklı Projeksiyon Perdesi", "url": "https://www.trendyol.com/havit/220x125cm-ayarlanabilir-100inc-16-9-boyut-ayakli-projeksiyon-perdesi-p-761572765?boutiqueId=61&merchantId=133183"},
     # ── t240 ──────────────────────────────────────────────
-    {"olcu": "t240", "site": "Trendyol", "ad": "Genel Markalar T120 240x200 Cm Tripod Projeksiyon Perdesi", "url": "https://www.trendyol.com/genel-markalar/t120-240x200-cm-tripod-projeksiyon-perdesi-p-57433158?boutiqueId=61&merchantId=132091"},
     # ── s150 ──────────────────────────────────────────────
-    {"olcu": "s150", "site": "Trendyol", "ad": "GÖLGE STOR Manuel En150cm Boy160cm Projeksiyon Perdesi Yeni Akıllı Kumaş Blackout-ışık Geçirmez 4k", "url": "https://www.trendyol.com/golge-stor/manuel-en150cm-boy160cm-projeksiyon-perdesi-yeni-akilli-kumas-blackout-isik-gecirmez-4k-p-661489899?boutiqueId=61&merchantId=585843"},
     # ── e200 ──────────────────────────────────────────────
-    {"olcu": "e200", "site": "Trendyol", "ad": "Gamma Screens 200x200 Motorlu Projeksiyon Perdesi", "url": "https://www.trendyol.com/gamma-screens/200x200-motorlu-projeksiyon-perdesi-p-1129289425?boutiqueId=61&merchantId=108524"},
     # ── s180 ──────────────────────────────────────────────
-    {"olcu": "s180", "site": "Trendyol", "ad": "GÖLGE STOR Manuel En180cm Boy170cm Projeksiyon Perdesi Yeni Akıllı Kumaş Blackout-ışık Geçirmez 4k 8k Hd", "url": "https://www.trendyol.com/golge-stor/manuel-en180cm-boy170cm-projeksiyon-perdesi-yeni-akilli-kumas-blackout-isik-gecirmez-4k-8k-hd-p-366319391?boutiqueId=61&merchantId=585843"},
     # ── s200 ──────────────────────────────────────────────
-    {"olcu": "s200", "site": "Trendyol", "ad": "CODEGEN Ax-20 200x200 Cm Storlu Manuel Projeksiyon Perdesi (ARKASI SİYAH FONLU)", "url": "https://www.trendyol.com/codegen/ax-20-200x200-cm-storlu-manuel-projeksiyon-perdesi-arkasi-siyah-fonlu-p-2704858?boutiqueId=61&merchantId=1058560"},
     # ── e260 ──────────────────────────────────────────────
-    {"olcu": "e260", "site": "Trendyol", "ad": "Gamma Screens 265x200 Motorlu Projeksiyon Perdesi", "url": "https://www.trendyol.com/gamma-screens/265x200-motorlu-projeksiyon-perdesi-p-32241750?boutiqueId=61&merchantId=108524"},
     # ── p80 ──────────────────────────────────────────────
-    {"olcu": "p80", "site": "Trendyol", "ad": "CODEGEN MX-40 81x61 cm Taşınabilir Portatif Masaüstü Projeksiyon Perdesi ( Çanta Dahil)", "url": "https://www.trendyol.com/codegen/mx-40-81x61-cm-tasinabilir-portatif-masaustu-projeksiyon-perdesi-canta-dahil-p-129161294?boutiqueId=61&merchantId=1058560"},
     # ── s180 ──────────────────────────────────────────────
-    {"olcu": "s180", "site": "Trendyol", "ad": "Genel Markalar Bej AX-18 STORLU PROJEKSİYON PERDESİ 180x180 (Arkası Siyah Fonlu - Duvar/Tavan Asılabilir) 1 Yıl", "url": "https://www.trendyol.com/genel-markalar/bej-ax-18-storlu-projeksiyon-perdesi-180x180-arkasi-siyah-fonlu-duvar-tavan-asilabilir-1-yil-p-760351235?boutiqueId=61&merchantId=145937"},
     # ── e200 ──────────────────────────────────────────────
-    {"olcu": "e200", "site": "Trendyol", "ad": "GÖLGE STOR En:215cm Boy:180cm Şarjlı Projeksiyon Perdesi Lityum Pilli Uzun Ömürlü Ve Uzaktan Kumandalı", "url": "https://www.trendyol.com/golge-stor/en-215cm-boy-180cm-sarjli-projeksiyon-perdesi-lityum-pilli-uzun-omurlu-ve-uzaktan-kumandali-p-885143692?boutiqueId=61&merchantId=585843"},
     # ── e260 ──────────────────────────────────────────────
-    {"olcu": "e260", "site": "Trendyol", "ad": "Rovline Akıllı Projeksiyon Perdesi, Wi-Fi + Rf, Motorlu, 260x200, Sesle Kontrol, Kumanda ve Mobil Uygulama Kontrollü, Tuya uyumlu", "url": "https://www.trendyol.com/rovline/akilli-projeksiyon-perdesi-wi-fi-rf-motorlu-260x200-sesle-kontrol-kumanda-ve-mobil-uygulama-kontrollu-tuya-uyumlu-p-1147923036?boutiqueId=61&merchantId=206489"},
     # ── s260 ──────────────────────────────────────────────
-    {"olcu": "s260", "site": "Trendyol", "ad": "GÖLGE STOR Manuel En260cm Boy190cm Projeksiyon Perdesi Yeni Akıllı Kumaş Blackout-ışık Geçirmez 4k 8k Hd", "url": "https://www.trendyol.com/golge-stor/manuel-en260cm-boy190cm-projeksiyon-perdesi-yeni-akilli-kumas-blackout-isik-gecirmez-4k-8k-hd-p-274499740?boutiqueId=61&merchantId=585843"},
     # ── t180 ──────────────────────────────────────────────
-    {"olcu": "t180", "site": "Trendyol", "ad": "Genel Markalar T70 180x180(70inch)tripod Projeksiyon Perdesi", "url": "https://www.trendyol.com/genel-markalar/t70-180x180-70inch-tripod-projeksiyon-perdesi-p-59052827?boutiqueId=61&merchantId=132091"},
     # ── s200 ──────────────────────────────────────────────
-    {"olcu": "s200", "site": "Trendyol", "ad": "GÖLGE STOR Manuel En210cm Boy180cm Projeksiyon Perdesi Yeni Akıllı Kumaş Blackout-ışık Geçirmez 4k 8k Hd", "url": "https://www.trendyol.com/golge-stor/manuel-en210cm-boy180cm-projeksiyon-perdesi-yeni-akilli-kumas-blackout-isik-gecirmez-4k-8k-hd-p-690590872?boutiqueId=61&merchantId=585843"},
     # ── e180 ──────────────────────────────────────────────
-    {"olcu": "e180", "site": "Trendyol", "ad": "Gamma Screens 180x180 Motorlu Projeksiyon Perdesi", "url": "https://www.trendyol.com/gamma-screens/180x180-motorlu-projeksiyon-perdesi-p-32240800?boutiqueId=61&merchantId=108524"},
     # ── t200 ──────────────────────────────────────────────
-    {"olcu": "t200", "site": "Trendyol", "ad": "CODEGEN TX-20 200x200 cm Tripod Ayaklı Taşınabilir Manuel Projeksiyon Perdesi (Arkası Siyah Fonlu)", "url": "https://www.trendyol.com/codegen/tx-20-200x200-cm-tripod-ayakli-tasinabilir-manuel-projeksiyon-perdesi-arkasi-siyah-fonlu-p-2704896?boutiqueId=61&merchantId=1058560"},
     # ── e240 ──────────────────────────────────────────────
-    {"olcu": "e240", "site": "Trendyol", "ad": "Peak M120 240x200 Cm Motorlu Kumandalı Projeksiyon Perdesi-beyaz Kasa", "url": "https://www.trendyol.com/peak/m120-240x200-cm-motorlu-kumandali-projeksiyon-perdesi-beyaz-kasa-p-66333205?boutiqueId=61&merchantId=132091"},
     # ── t240 ──────────────────────────────────────────────
-    {"olcu": "t240", "site": "Trendyol", "ad": "CODEGEN 240X200Cm Tripod Projeksiyon Perdesi TX-24", "url": "https://www.trendyol.com/codegen/240x200cm-tripod-projeksiyon-perdesi-tx-24-p-847628508?boutiqueId=61&merchantId=201140"},
     # ── t200 ──────────────────────────────────────────────
-    {"olcu": "t200", "site": "Trendyol", "ad": "LiteOut 200x200cm Tripod Ayaklı Projeksiyon Perdesi", "url": "https://www.trendyol.com/liteout/200x200cm-tripod-ayakli-projeksiyon-perdesi-p-5474853?boutiqueId=61&merchantId=107190"},
     # ── e340 ──────────────────────────────────────────────
-    {"olcu": "e340", "site": "Trendyol", "ad": "GÖLGE STOR En340cm Boy225cm Projeksiyon Perdesi Motorlu Yeni Akıllı Kumaş Blackout-ışık Geçirmez 4k 8k Hd", "url": "https://www.trendyol.com/golge-stor/en340cm-boy225cm-projeksiyon-perdesi-motorlu-yeni-akilli-kumas-blackout-isik-gecirmez-4k-8k-hd-p-857293551?boutiqueId=61&merchantId=585843"},
     # ── t180 ──────────────────────────────────────────────
-    {"olcu": "t180", "site": "Trendyol", "ad": "Genel Markalar Tpp-180, 180x180, Trıpod, Projeksiyon Perdesi, Arkası Siyah Fonlu, Taşınabilir Ayaklı Model", "url": "https://www.trendyol.com/genel-markalar/tpp-180-180x180-tripod-projeksiyon-perdesi-arkasi-siyah-fonlu-tasinabilir-ayakli-model-p-941664099?boutiqueId=61&merchantId=712699"},
     # ── s240 ──────────────────────────────────────────────
-    {"olcu": "s240", "site": "Trendyol", "ad": "gaman Storlu Projeksiyon Perdesi 240x200 Cm Işık Geçirmez Beyaz Renk Yüksek Kaliteli Görüntü İçin", "url": "https://www.trendyol.com/gaman/storlu-projeksiyon-perdesi-240x200-cm-isik-gecirmez-beyaz-renk-yuksek-kaliteli-goruntu-icin-p-1097390274?boutiqueId=61&merchantId=130886"},
     # ── e240 ──────────────────────────────────────────────
-    {"olcu": "e240", "site": "Trendyol", "ad": "GÖLGE STOR En250cm Boy190cm Projeksiyon Perdesi Motorlu Yeni Akıllı Kumaş Blackout-ışık Geçirmez 4k", "url": "https://www.trendyol.com/golge-stor/en250cm-boy190cm-projeksiyon-perdesi-motorlu-yeni-akilli-kumas-blackout-isik-gecirmez-4k-p-366307993?boutiqueId=61&merchantId=585843"},
     # ── p140 ──────────────────────────────────────────────
-    {"olcu": "p140", "site": "Trendyol", "ad": "Peak 142x107cm Taşınabilir Portatif Pull Up Floor Projeksiyon Perdesi F70", "url": "https://www.trendyol.com/peak/142x107cm-tasinabilir-portatif-pull-up-floor-projeksiyon-perdesi-f70-p-865173120?boutiqueId=61&merchantId=132091"},
     # ── e300 ──────────────────────────────────────────────
-    {"olcu": "e300", "site": "Trendyol", "ad": "Rovline Akıllı Projeksiyon Perdesi, Wi-Fi + Rf, Motorlu, 290x200, Sesle Kontrol, Kumanda ve Mobil Uygulama Kontrollü, Tuya uyumlu", "url": "https://www.trendyol.com/rovline/akilli-projeksiyon-perdesi-wi-fi-rf-motorlu-290x200-sesle-kontrol-kumanda-ve-mobil-uygulama-kontrollu-tuya-uyumlu-p-1147923242?boutiqueId=61&merchantId=206489"},
     # ── p200 ──────────────────────────────────────────────
-    {"olcu": "p200", "site": "Trendyol", "ad": "CODEGEN PTX-200 210x123 Projeksiyon Perdesi Portatif Pull Up Floor", "url": "https://www.trendyol.com/codegen/ptx-200-210x123-projeksiyon-perdesi-portatif-pull-up-floor-p-1131291955?boutiqueId=61&merchantId=162201"},
     # ── t220 ──────────────────────────────────────────────
-    {"olcu": "t220", "site": "Trendyol", "ad": "Groove Vizio Pro 100¨Inch 220x125cm Blackout Işık Geçirmez Tripod Ayaklı Projeksiyon Perdesi +Taşına", "url": "https://www.trendyol.com/groove/vizio-pro-100-inch-220x125cm-blackout-isik-gecirmez-tripod-ayakli-projeksiyon-perdesi-tasina-p-996713723?boutiqueId=61&merchantId=106199"},
     # ── e200 ──────────────────────────────────────────────
-    {"olcu": "e200", "site": "Trendyol", "ad": "Peak M100 200x150 Cm Motorlu Kumandalı Projeksiyon Perdesi-beyaz Kasa", "url": "https://www.trendyol.com/peak/m100-200x150-cm-motorlu-kumandali-projeksiyon-perdesi-beyaz-kasa-p-66902102?boutiqueId=61&merchantId=132091"},
     # ── e150 ──────────────────────────────────────────────
-    {"olcu": "e150", "site": "Trendyol", "ad": "GÖLGE STOR En:150cm Boy:160cm Şarjlı Projeksiyon Perdesi Lityum Pilli Uzun Ömürlü Ve Uzaktan Kumandalı", "url": "https://www.trendyol.com/golge-stor/en-150cm-boy-160cm-sarjli-projeksiyon-perdesi-lityum-pilli-uzun-omurlu-ve-uzaktan-kumandali-p-885161024?boutiqueId=61&merchantId=585843"},
     # ── s240 ──────────────────────────────────────────────
-    {"olcu": "s240", "site": "Trendyol", "ad": "taviss 240X200 CM STORLU MANUEL PROJEKSİYON PERDESİ", "url": "https://www.trendyol.com/taviss/240x200-cm-storlu-manuel-projeksiyon-perdesi-p-863626403?boutiqueId=61&merchantId=182955"},
     # ── t120 ──────────────────────────────────────────────
-    {"olcu": "t120", "site": "Trendyol", "ad": "LiteOut 135x100cm Tripod Projeksiyon Perdesi", "url": "https://www.trendyol.com/liteout/135x100cm-tripod-projeksiyon-perdesi-p-117353791?boutiqueId=61&merchantId=107190"},
     # ── p160 ──────────────────────────────────────────────
-    {"olcu": "p160", "site": "Trendyol", "ad": "Peak 163X122 cm Taşınabilir Portatif Pull Up Floor Projeksiyon Perdesi F80", "url": "https://www.trendyol.com/peak/163x122-cm-tasinabilir-portatif-pull-up-floor-projeksiyon-perdesi-f80-p-951821437?boutiqueId=61&merchantId=132091"},
     # ── s180 ──────────────────────────────────────────────
-    {"olcu": "s180", "site": "Trendyol", "ad": "Gamma Screens 180x180 Storlu Projeksiyon Perdesi", "url": "https://www.trendyol.com/gamma-screens/180x180-storlu-projeksiyon-perdesi-p-49150741?boutiqueId=61&merchantId=108524"},
     # ── t120 ──────────────────────────────────────────────
-    {"olcu": "t120", "site": "Trendyol", "ad": "LiteOut 120x90cm Taşınabilir Tripod Ayaklı Projeksiyon Perdesi", "url": "https://www.trendyol.com/liteout/120x90cm-tasinabilir-tripod-ayakli-projeksiyon-perdesi-p-40132511?boutiqueId=61&merchantId=107190"},
     # ── e300 ──────────────────────────────────────────────
-    {"olcu": "e300", "site": "Trendyol", "ad": "GÖLGE STOR En290cm Boy200cm Projeksiyon Perdesi Motorlu Yeni Akıllı Kumaş Blackout-ışık Geçirmez 4k 8k Hd", "url": "https://www.trendyol.com/golge-stor/en290cm-boy200cm-projeksiyon-perdesi-motorlu-yeni-akilli-kumas-blackout-isik-gecirmez-4k-8k-hd-p-681098047?boutiqueId=61&merchantId=585843"},
     # ── e200 ──────────────────────────────────────────────
-    {"olcu": "e200", "site": "Trendyol", "ad": "GÖLGE STOR En200cm Boy180cm Projeksiyon Perdesi Motorlu Yeni Akıllı Kumaş Blackout-ışık Geçirmez 4k 8k Hd", "url": "https://www.trendyol.com/golge-stor/en200cm-boy180cm-projeksiyon-perdesi-motorlu-yeni-akilli-kumas-blackout-isik-gecirmez-4k-8k-hd-p-333049751?boutiqueId=61&merchantId=585843"},
     # ── e260 ──────────────────────────────────────────────
-    {"olcu": "e260", "site": "Trendyol", "ad": "GÖLGE STOR En267cm Boy200cm Projeksiyon Perdesi Motorlu Yeni Akıllı Kumaş Blackout-ışık Geçirmez 4k 8k Hd", "url": "https://www.trendyol.com/golge-stor/en267cm-boy200cm-projeksiyon-perdesi-motorlu-yeni-akilli-kumas-blackout-isik-gecirmez-4k-8k-hd-p-371919259?boutiqueId=61&merchantId=585843"},
     # ── e180 ──────────────────────────────────────────────
-    {"olcu": "e180", "site": "Trendyol", "ad": "Rovline Akıllı Projeksiyon Perdesi, Wi-Fi + Rf, Motorlu, 180x180, Sesle Kontrol, Kumanda ve Mobil Uygulama Kontrollü, Tuya uyumlu", "url": "https://www.trendyol.com/pd/rovline/akilli-projeksiyon-perdesi-wi-fi-rf-motorlu-180x180-sesle-kontrol-kumanda-ve-mobil-uygulama-kontrollu-tuya-uyumlu-p-1147923685?boutiqueId=61&merchantId=206489,/pd/rovline/akilli-projeksiyon-perdesi-wi-fi-rf-motorlu-180x180-sesle-kontrol-kumanda-ve-mobil-uygulama-kontrollu-tuya-uyumlu-p-1147923685?choicennenabled=false&subPathStrategy=no-subpath&boutiqueId=61&merchantId=206489"},
     # ── s240 ──────────────────────────────────────────────
-    {"olcu": "s240", "site": "Trendyol", "ad": "CODEGEN AX-24 240x200 cm Storlu Manuel Projeksiyon Perdesi (Arkası Siyah Fonlu)", "url": "https://www.trendyol.com/codegen/ax-24-240x200-cm-storlu-manuel-projeksiyon-perdesi-arkasi-siyah-fonlu-p-90956708?boutiqueId=61&merchantId=1058560"},
     # ── e240 ──────────────────────────────────────────────
-    {"olcu": "e240", "site": "Trendyol", "ad": "Rovline Akıllı Projeksiyon Perdesi, Wi-Fi + Rf, Motorlu, 240x200, Sesle Kontrol, Kumanda ve Mobil Uygulama Kontrollü, Tuya uyumlu", "url": "https://www.trendyol.com/pd/rovline/akilli-projeksiyon-perdesi-wi-fi-rf-motorlu-240x200-sesle-kontrol-kumanda-ve-mobil-uygulama-kontrollu-tuya-uyumlu-p-1147920610?choicennenabled=false&subPathStrategy=no-subpath&boutiqueId=61&merchantId=206489"},
 ]
 
 def fiyat_parse(text):
