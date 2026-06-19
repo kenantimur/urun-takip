@@ -250,60 +250,11 @@ URUNLER = [
     # ── e260 ──────────────────────────────────────────────
     {"olcu": "e260", "site": "Trendyol", "ad": "GÖLGE STOR En267cm Boy200cm Projeksiyon Perdesi Motorlu Yeni Akıllı Kumaş Blackout-ışık Geçirmez 4k 8k Hd", "url": "https://www.trendyol.com/golge-stor/en267cm-boy200cm-projeksiyon-perdesi-motorlu-yeni-akilli-kumas-blackout-isik-gecirmez-4k-8k-hd-p-371919259?boutiqueId=61&merchantId=585843"},
     # ── e180 ──────────────────────────────────────────────
-    {"olcu": "e180", "site": "Trendyol", "ad": "Rovline Akıllı Projeksiyon Perdesi, Wi-Fi + Rf, Motorlu, 180x180, Sesle Kontrol, Kumanda ve Mobil Uygulama Kontrollü, Tuya uyumlu", "url": "https://www.trendyol.com/pd/rovline/akilli-projeksiyon-perdesi-wi-fi-rf-motorlu-180x180-sesle-kontrol-kumanda-ve-mobil-uygulama-kontrollu-tuya-uyumlu-p-1147923685?boutiqueId=61&merchantId=206489,/pd/rovline/akilli-projeksiyon-perdesi-wi-fi-rf-motorlu-180x180-sesle-kontrol-kumanda-ve-mobil-uygulama-kontrollu-tuya-uyumlu-p-1147923685?choicennenabled=false&subPathStrategy=no-subpath&boutiqueId=61&merchantId=206489"},
+    {"olcu": "e180", "site": "Trendyol", "ad": "Rovline Akıllı Projeksiyon Perdesi, Wi-Fi + Rf, Motorlu, 180x180, Sesle Kontrol, Kumanda ve Mobil Uygulama Kontrollü, Tuya uyumlu", "url": "https://www.trendyol.com/pd/rovline/akilli-projeksiyon-perdesi-wi-fi-rf-motorlu-180x180-sesle-kontrol-kumanda-ve-mobil-uygulama-kontrollu-tuya-uyumlu-p-1147923685?boutiqueId=61&merchantId=206489"},
     # ── s240 ──────────────────────────────────────────────
     {"olcu": "s240", "site": "Trendyol", "ad": "CODEGEN AX-24 240x200 cm Storlu Manuel Projeksiyon Perdesi (Arkası Siyah Fonlu)", "url": "https://www.trendyol.com/codegen/ax-24-240x200-cm-storlu-manuel-projeksiyon-perdesi-arkasi-siyah-fonlu-p-90956708?boutiqueId=61&merchantId=1058560"},
     # ── e240 ──────────────────────────────────────────────
     {"olcu": "e240", "site": "Trendyol", "ad": "Rovline Akıllı Projeksiyon Perdesi, Wi-Fi + Rf, Motorlu, 240x200, Sesle Kontrol, Kumanda ve Mobil Uygulama Kontrollü, Tuya uyumlu", "url": "https://www.trendyol.com/pd/rovline/akilli-projeksiyon-perdesi-wi-fi-rf-motorlu-240x200-sesle-kontrol-kumanda-ve-mobil-uygulama-kontrollu-tuya-uyumlu-p-1147920610?choicennenabled=false&subPathStrategy=no-subpath&boutiqueId=61&merchantId=206489"},
-    # ── e300 ──────────────────────────────────────────────
-    # ── p140 ──────────────────────────────────────────────
-    # ── s150 ──────────────────────────────────────────────
-    # ── s180 ──────────────────────────────────────────────
-    # ── s200 ──────────────────────────────────────────────
-    # ── s240 ──────────────────────────────────────────────
-    # ── t150 ──────────────────────────────────────────────
-    # ── t180 ──────────────────────────────────────────────
-    # ── t200 ──────────────────────────────────────────────
-    # ── t220 ──────────────────────────────────────────────
-    # ── t240 ──────────────────────────────────────────────
-    # ── s150 ──────────────────────────────────────────────
-    # ── e200 ──────────────────────────────────────────────
-    # ── s180 ──────────────────────────────────────────────
-    # ── s200 ──────────────────────────────────────────────
-    # ── e260 ──────────────────────────────────────────────
-    # ── p80 ──────────────────────────────────────────────
-    # ── s180 ──────────────────────────────────────────────
-    # ── e200 ──────────────────────────────────────────────
-    # ── e260 ──────────────────────────────────────────────
-    # ── s260 ──────────────────────────────────────────────
-    # ── t180 ──────────────────────────────────────────────
-    # ── s200 ──────────────────────────────────────────────
-    # ── e180 ──────────────────────────────────────────────
-    # ── t200 ──────────────────────────────────────────────
-    # ── e240 ──────────────────────────────────────────────
-    # ── t240 ──────────────────────────────────────────────
-    # ── t200 ──────────────────────────────────────────────
-    # ── e340 ──────────────────────────────────────────────
-    # ── t180 ──────────────────────────────────────────────
-    # ── s240 ──────────────────────────────────────────────
-    # ── e240 ──────────────────────────────────────────────
-    # ── p140 ──────────────────────────────────────────────
-    # ── e300 ──────────────────────────────────────────────
-    # ── p200 ──────────────────────────────────────────────
-    # ── t220 ──────────────────────────────────────────────
-    # ── e200 ──────────────────────────────────────────────
-    # ── e150 ──────────────────────────────────────────────
-    # ── s240 ──────────────────────────────────────────────
-    # ── t120 ──────────────────────────────────────────────
-    # ── p160 ──────────────────────────────────────────────
-    # ── s180 ──────────────────────────────────────────────
-    # ── t120 ──────────────────────────────────────────────
-    # ── e300 ──────────────────────────────────────────────
-    # ── e200 ──────────────────────────────────────────────
-    # ── e260 ──────────────────────────────────────────────
-    # ── e180 ──────────────────────────────────────────────
-    # ── s240 ──────────────────────────────────────────────
-    # ── e240 ──────────────────────────────────────────────
 ]
 
 def fiyat_parse(text):
@@ -447,10 +398,50 @@ def cek_urun(urun):
                     break
 
         if not sonuc["satici"]:
-            for key in ["merchant", "Merchant", "seller", "Seller", "satıcı", "Satıcı", "storeName", "shopName"]:
-                idx = html.find(key)
-                if idx != -1:
-                    print(f"    DBG satıcı anahtar '{key}': {html[idx:idx+120]}")
+            # JSON-LD bloklarından seller/brand bilgisini ara
+            for ld_str in re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
+                try:
+                    ld = json.loads(ld_str)
+                    if isinstance(ld, list):
+                        for item in ld:
+                            if isinstance(item, dict):
+                                offers = item.get("offers", {})
+                                if isinstance(offers, list): offers = offers[0] if offers else {}
+                                seller = offers.get("seller", {}) if isinstance(offers, dict) else {}
+                                if isinstance(seller, dict) and seller.get("name"):
+                                    sonuc["satici"] = seller["name"]
+                                    print(f"    DBG JSON-LD listeden satıcı bulundu: {seller['name']}")
+                    elif isinstance(ld, dict):
+                        offers = ld.get("offers", {})
+                        if isinstance(offers, list): offers = offers[0] if offers else {}
+                        seller = offers.get("seller", {}) if isinstance(offers, dict) else {}
+                        if isinstance(seller, dict) and seller.get("name"):
+                            sonuc["satici"] = seller["name"]
+                            print(f"    DBG JSON-LD dict satıcı bulundu: {seller['name']}")
+                except Exception as e:
+                    pass
+
+            if not sonuc["satici"]:
+                # merchantName regex - JSON içinde isim formatı dene
+                for pat in [r'"merchantName"\s*:\s*"([^"]{2,40})"',
+                            r'"merchant"\s*:\s*\{[^}]*"name"\s*:\s*"([^"]{2,40})"',
+                            r'"storeName"\s*:\s*"([^"]{2,40})"',
+                            r'"sellerName"\s*:\s*"([^"]{2,40})"',
+                            r'"merchantDisplayName"\s*:\s*"([^"]{2,40})"']:
+                    m = re.search(pat, html)
+                    if m:
+                        sonuc["satici"] = m.group(1).strip()
+                        print(f"    DBG regex satıcı bulundu ({pat}): {m.group(1)}")
+                        break
+
+            if not sonuc["satici"]:
+                # DOM'dan dene - "Mağazaya Git" veya "Satıcı:" gibi metin civarı
+                m = re.search(r'class="[^"]*store-name[^"]*"[^>]*>\s*([^<]{2,50})', html)
+                if not m:
+                    m = re.search(r'class="[^"]*merchant-info[^"]*"[^>]*>\s*<[^>]+>\s*([^<]{2,50})', html)
+                if m:
+                    sonuc["satici"] = m.group(1).strip()
+                    print(f"    DBG DOM satıcı bulundu: {m.group(1)}")
 
     elif site == "hepsiburada":
         for ld_str in re.findall(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL):
@@ -555,16 +546,14 @@ def sheets_guncelle(veriler):
 
     # ── Adım 3: Sayfa sırasını garanti et — Ürün Takip en başta, dünün arşivi 2. sırada ──
     try:
-        all_sheets = sh.worksheets()
         ana_ws = sh.worksheet("Ürün Takip")
-        diger = [ws for ws in all_sheets if ws.title != "Ürün Takip"]
+        ana_ws.update_index(0)
         try:
             dun_ws = sh.worksheet(dun_tarih)
-            diger = [ws for ws in diger if ws.title != dun_tarih]
-            yeni_sira = [ana_ws.id, dun_ws.id] + [ws.id for ws in diger]
+            dun_ws.update_index(1)
         except:
-            yeni_sira = [ana_ws.id] + [ws.id for ws in diger]
-        sh.reorder_sheets(yeni_sira)
+            pass
+        print(f"  Sayfa sırası güncellendi.")
     except Exception as e:
         print(f"  Sıralama hatası: {e}")
 
