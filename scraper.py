@@ -557,10 +557,6 @@ def sheets_guncelle(veriler):
     except Exception as e:
         print(f"  Sıralama hatası: {e}")
 
-    ana_ws.append_row(basliklar)
-    ana_ws.format("A1:I1", header_format)
-    for v in veriler:
-        satir_yaz(ana_ws, v)
     print(f"  Ana sheet güncellendi: {len(veriler)} ürün")
     print(f"✅ Google Sheets güncellendi: {tarih} {saat}")
 
