@@ -558,12 +558,26 @@ def cek_urun(urun):
             if not m: m = re.search(r'class="[^"]*merchant[^"]*"[^>]*>\s*([^<]+)', html)
             if m: sonuc["satici"] = m.group(1).strip()
         if not sonuc["puan"]:
-            m = re.search(r'"ratingValue"\s*:\s*"?([\d.]+)"?', html)
-            if m: sonuc["puan"] = float(m.group(1))
+            for pat in [r'"ratingValue"\s*:\s*"?([\d.]+)"?',
+                        r'"starRating"\s*:\s*"?([\d.]+)"?',
+                        r'"averageRating"\s*:\s*"?([\d.]+)"?',
+                        r'"ratingScore"\s*:\s*"?([\d.]+)"?']:
+                m = re.search(pat, html)
+                if m:
+                    val = float(m.group(1))
+                    if 0 < val <= 5:
+                        sonuc["puan"] = val
+                        break
         if not sonuc["yorum"]:
-            m = re.search(r'"reviewCount"\s*:\s*(\d+)', html)
-            if not m: m = re.search(r'(\d+)\s*[Dd]eğerlendirme', html)
-            if m: sonuc["yorum"] = int(m.group(1))
+            for pat in [r'"reviewCount"\s*:\s*(\d+)',
+                        r'"totalReviewCount"\s*:\s*(\d+)',
+                        r'"commentCount"\s*:\s*(\d+)',
+                        r'(\d+)\s*[Dd]eğerlendirme',
+                        r'(\d+)\s*[Yy]orum']:
+                m = re.search(pat, html)
+                if m:
+                    sonuc["yorum"] = int(m.group(1))
+                    break
 
     return sonuc
 
