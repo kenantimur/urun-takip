@@ -2,7 +2,7 @@ name: Günlük Ürün Takip
 
 on:
   schedule:
-    - cron: '0 0 */2 * *'  # 2 günde bir gece 03:00 Türkiye saati
+    - cron: '0 0 */5 * *'  # 5 günde bir gece 03:00 Türkiye saati
   workflow_dispatch:
 
 jobs:
